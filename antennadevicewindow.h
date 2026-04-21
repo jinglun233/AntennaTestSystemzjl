@@ -74,6 +74,12 @@ private:
     void basicParamSend(const QByteArray &data, int page);
     void layoutCtrlSend(const QByteArray &data, int page);
     void updateDutyCycle();
+
+    // 文件上注公共辅助函数
+    bool readDirectoryBinaryFiles(const QString &dirPath, QByteArray &outData);
+    void uploadPagedData(const QByteArray &data, char paramId,
+                         const QString &successMsg,
+                         void (AntennaDeviceWindow::*pageSender)(const QByteArray&, int));
     Ui::antennadevicewindow *ui;
     QString m_wave2DFilePath;
     QString m_basicParamFilePath;

@@ -132,8 +132,10 @@ bool ProtocolCodec::parse(const QByteArray &rawData, DataFrame &outFrame, int &c
         ptr[Protocol::TOTAL_FRAME_SIZE - 1]);
 
     if (receivedSum != calculatedSum) {
-        // 校验和不匹配，跳过首字节继续搜索
-        consumed = 1;
+        // 校验和不匹配：帧头、帧类型、指令类型均已匹配，
+        // 说明这是一个损坏的帧。定长帧协议下直接跳过整帧长度，
+        // 避免 O(n²) 逐字节重搜（极端垃圾数据场景）。
+        consumed = Protocol::TOTAL_FRAME_SIZE;
         return false;
     }
 

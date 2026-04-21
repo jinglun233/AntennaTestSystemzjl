@@ -411,35 +411,18 @@ void AntennaDeviceWindow::on_wave2DFileButton_clicked()
     ui->wave2DFilePathEdit->setText(dirPath);
 }
 
-void AntennaDeviceWindow::on_wave2DUploadButton_clicked()
+bool AntennaDeviceWindow::readDirectoryBinaryFiles(const QString &dirPath, QByteArray &outData)
 {
-    if (m_wave2DFilePath.isEmpty()) {
-        QMessageBox::warning(this, "提示", "请先选择二维波控文件夹。");
-        return;
-    }
-
-    QDir dir(m_wave2DFilePath);
-    if (!dir.exists()) {
-        QMessageBox::warning(this, "错误", "文件夹不存在。");
-        return;
-    }
+    QDir dir(dirPath);
+    if (!dir.exists()) return false;
 
     QStringList filters;
     filters << "*.*";
     QFileInfoList fileList = dir.entryInfoList(filters, QDir::Files | QDir::Readable, QDir::Name);
 
-    if (fileList.isEmpty()) {
-        QMessageBox::warning(this, "提示", "文件夹中没有文件。");
-        return;
-    }
-
-    QByteArray combinedData;
-
     for (const QFileInfo &fileInfo : fileList) {
         QFile file(fileInfo.absoluteFilePath());
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            continue;
-        }
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) continue;
 
         QByteArray fileContent = file.readAll();
         file.close();
@@ -461,35 +444,52 @@ void AntennaDeviceWindow::on_wave2DUploadButton_clicked()
                 currentFileBytes.append(static_cast<char>(value));
             }
         }
-
-        combinedData.append(currentFileBytes);
+        outData.append(currentFileBytes);
     }
+    return !outData.isEmpty();
+}
 
-    if (combinedData.isEmpty()) {
-        QMessageBox::warning(this, "错误", "没有有效的波控数据。");
-        return;
-    }
-
+void AntennaDeviceWindow::uploadPagedData(const QByteArray &data, char paramId,
+                                          const QString &successMsg,
+                                          void (AntennaDeviceWindow::*pageSender)(const QByteArray&, int))
+{
     short page = 1;
-    int totalPages = qCeil(static_cast<double>(combinedData.size()) / 1024.0);
+    int totalPages = qCeil(static_cast<double>(data.size()) / 1024.0);
 
-    sendBokongCode(totalPages, 0xB0);
+    sendBokongCode(totalPages, paramId);
 
     QThread::msleep(50);
 
     int offset = 0;
-    while (offset < combinedData.size()) {
-        int remaining = combinedData.size() - offset;
+    while (offset < data.size()) {
+        int remaining = data.size() - offset;
         int copySize = qMin(remaining, 1024);
-        QByteArray dataPage = combinedData.mid(offset, copySize);
+        QByteArray dataPage = data.mid(offset, copySize);
 
-        bokongMaSend(dataPage, page);
+        (this->*pageSender)(dataPage, page);
         page++;
         offset += copySize;
         QThread::msleep(50);
     }
 
-    QMessageBox::information(this, "完成", "波控码已上注。");
+    QMessageBox::information(this, "完成", successMsg);
+}
+
+void AntennaDeviceWindow::on_wave2DUploadButton_clicked()
+{
+    if (m_wave2DFilePath.isEmpty()) {
+        QMessageBox::warning(this, "提示", "请先选择二维波控文件夹。");
+        return;
+    }
+
+    QByteArray combinedData;
+    if (!readDirectoryBinaryFiles(m_wave2DFilePath, combinedData)) {
+        QMessageBox::warning(this, "错误", "没有有效的波控数据。");
+        return;
+    }
+
+    uploadPagedData(combinedData, 0xB0, "波控码已上注。",
+                    &AntennaDeviceWindow::bokongMaSend);
 }
 
 void AntennaDeviceWindow::on_basicParamFileButton_clicked()
@@ -515,78 +515,14 @@ void AntennaDeviceWindow::on_basicParamUploadButton_clicked()
         return;
     }
 
-    QDir dir(m_basicParamFilePath);
-    if (!dir.exists()) {
-        QMessageBox::warning(this, "错误", "文件夹不存在。");
-        return;
-    }
-
-    QStringList filters;
-    filters << "*.*";
-    QFileInfoList fileList = dir.entryInfoList(filters, QDir::Files | QDir::Readable, QDir::Name);
-
-    if (fileList.isEmpty()) {
-        QMessageBox::warning(this, "提示", "文件夹中没有文件。");
-        return;
-    }
-
     QByteArray combinedData;
-
-    for (const QFileInfo &fileInfo : fileList) {
-        QFile file(fileInfo.absoluteFilePath());
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            continue;
-        }
-
-        QByteArray fileContent = file.readAll();
-        file.close();
-
-        QString strContent = QString::fromUtf8(fileContent);
-        strContent = strContent.replace(" ", "");
-
-        int remainder = strContent.length() % 8;
-        if (remainder != 0) {
-            strContent = strContent.leftJustified(strContent.length() + (8 - remainder), '0');
-        }
-
-        QByteArray currentFileBytes;
-        for (int i = 0; i < strContent.length() / 8; i++) {
-            QString tempBinary = strContent.mid(i * 8, 8);
-            bool ok;
-            unsigned short value = tempBinary.toUShort(&ok, 2);
-            if (ok) {
-                currentFileBytes.append(static_cast<char>(value));
-            }
-        }
-
-        combinedData.append(currentFileBytes);
-    }
-
-    if (combinedData.isEmpty()) {
+    if (!readDirectoryBinaryFiles(m_basicParamFilePath, combinedData)) {
         QMessageBox::warning(this, "错误", "没有有效的基本参数数据。");
         return;
     }
 
-    short page = 1;
-    int totalPages = qCeil(static_cast<double>(combinedData.size()) / 1024.0);
-
-    sendBokongCode(totalPages, 0xF3);
-
-    QThread::msleep(50);
-
-    int offset = 0;
-    while (offset < combinedData.size()) {
-        int remaining = combinedData.size() - offset;
-        int copySize = qMin(remaining, 1024);
-        QByteArray dataPage = combinedData.mid(offset, copySize);
-
-        basicParamSend(dataPage, page);
-        page++;
-        offset += copySize;
-        QThread::msleep(50);
-    }
-
-    QMessageBox::information(this, "完成", "全计算基本参数已上注。");
+    uploadPagedData(combinedData, 0xF3, "全计算基本参数已上注。",
+                    &AntennaDeviceWindow::basicParamSend);
 }
 
 void AntennaDeviceWindow::on_layoutCtrlFileButton_clicked()
@@ -612,78 +548,14 @@ void AntennaDeviceWindow::on_layoutCtrlUploadButton_clicked()
         return;
     }
 
-    QDir dir(m_layoutCtrlFilePath);
-    if (!dir.exists()) {
-        QMessageBox::warning(this, "错误", "文件夹不存在。");
-        return;
-    }
-
-    QStringList filters;
-    filters << "*.*";
-    QFileInfoList fileList = dir.entryInfoList(filters, QDir::Files | QDir::Readable, QDir::Name);
-
-    if (fileList.isEmpty()) {
-        QMessageBox::warning(this, "提示", "文件夹中没有文件。");
-        return;
-    }
-
     QByteArray combinedData;
-
-    for (const QFileInfo &fileInfo : fileList) {
-        QFile file(fileInfo.absoluteFilePath());
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            continue;
-        }
-
-        QByteArray fileContent = file.readAll();
-        file.close();
-
-        QString strContent = QString::fromUtf8(fileContent);
-        strContent = strContent.replace(" ", "");
-
-        int remainder = strContent.length() % 8;
-        if (remainder != 0) {
-            strContent = strContent.leftJustified(strContent.length() + (8 - remainder), '0');
-        }
-
-        QByteArray currentFileBytes;
-        for (int i = 0; i < strContent.length() / 8; i++) {
-            QString tempBinary = strContent.mid(i * 8, 8);
-            bool ok;
-            unsigned short value = tempBinary.toUShort(&ok, 2);
-            if (ok) {
-                currentFileBytes.append(static_cast<char>(value));
-            }
-        }
-
-        combinedData.append(currentFileBytes);
-    }
-
-    if (combinedData.isEmpty()) {
+    if (!readDirectoryBinaryFiles(m_layoutCtrlFilePath, combinedData)) {
         QMessageBox::warning(this, "错误", "没有有效的布控数据。");
         return;
     }
 
-    short page = 1;
-    int totalPages = qCeil(static_cast<double>(combinedData.size()) / 1024.0);
-
-    sendBokongCode(totalPages, 0xD0);
-
-    QThread::msleep(50);
-
-    int offset = 0;
-    while (offset < combinedData.size()) {
-        int remaining = combinedData.size() - offset;
-        int copySize = qMin(remaining, 1024);
-        QByteArray dataPage = combinedData.mid(offset, copySize);
-
-        layoutCtrlSend(dataPage, page);
-        page++;
-        offset += copySize;
-        QThread::msleep(50);
-    }
-
-    QMessageBox::information(this, "完成", "全计算布控数据已上注。");
+    uploadPagedData(combinedData, 0xD0, "全计算布控数据已上注。",
+                    &AntennaDeviceWindow::layoutCtrlSend);
 }
 
 void AntennaDeviceWindow::bokongMaSend(const QByteArray &data, int page)

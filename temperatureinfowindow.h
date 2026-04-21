@@ -108,6 +108,10 @@ private:
     QCPItemTracer *m_tracer;           // 十字准星追踪器
     QCPItemText *m_tooltipText;        // 悬浮提示文字
     bool m_scrollBarDragging;          // 滚动条拖拽标志
+
+    // 曲线重绘节流（防止高频遥测导致主线程卡顿）
+    QTimer *m_replotThrottleTimer;
+    bool m_pendingReplot;
 };
 
 #endif // TEMPERATUREINFOWINDOW_H

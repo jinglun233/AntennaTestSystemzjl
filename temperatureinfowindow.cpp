@@ -23,7 +23,9 @@ TemperatureInfoWindow::TemperatureInfoWindow(QWidget *parent) :
     m_tooltipText(nullptr),
     m_scrollBarDragging(false),
     m_timeBase(0.0),
-    m_curvePaused(false)
+    m_curvePaused(false),
+    m_replotThrottleTimer(nullptr),
+    m_pendingReplot(false)
 {
     ui->setupUi(this);
 
@@ -273,6 +275,17 @@ void TemperatureInfoWindow::initCurveContainer()
         m_timeStamps.clear();
         m_customPlot->replot();
     });
+
+    // 初始化重绘节流定时器（100ms，避免高频遥测导致主线程卡顿）
+    m_replotThrottleTimer = new QTimer(this);
+    m_replotThrottleTimer->setSingleShot(true);
+    m_replotThrottleTimer->setInterval(100);
+    connect(m_replotThrottleTimer, &QTimer::timeout, this, [this]() {
+        if (m_pendingReplot) {
+            m_pendingReplot = false;
+            m_customPlot->replot();
+        }
+    });
 }
 
 void TemperatureInfoWindow::updateCurves()
@@ -352,7 +365,13 @@ void TemperatureInfoWindow::updateCurves()
         m_customPlot->yAxis->setRange(center - 5, center + 5);
     }
 
-    m_customPlot->replot();
+    // 节流重绘：100ms 内多次更新只触发一次 replot，避免主线程卡顿
+    if (!m_replotThrottleTimer->isActive()) {
+        m_customPlot->replot();
+        m_replotThrottleTimer->start();
+    } else {
+        m_pendingReplot = true;
+    }
 }
 
 // ============================================================================

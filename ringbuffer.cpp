@@ -198,6 +198,26 @@ void RingBuffer::ensureSpace(size_t required)
     // 需要扩容：新容量至少是当前容量的2倍，且能容纳所需空间
     size_t newSize = std::max(bufSize * 2, bufSize + required);
 
+    // 容量上限保护（16MB）：达到上限后不再扩容，改为丢弃最老数据
+    constexpr size_t MAX_CAPACITY = 16 * 1024 * 1024;
+    if (newSize > MAX_CAPACITY) {
+        newSize = MAX_CAPACITY;
+        // 如果到达上限仍然不够空间，强制丢弃老数据
+        if (newSize - currentUsed < required) {
+            size_t needDiscard = required - (newSize - currentUsed);
+            m_readPos = (m_readPos + needDiscard) % bufSize;
+            currentUsed -= needDiscard;
+            if (currentUsed == 0) {
+                m_readPos = 0;
+                m_writePos = 0;
+            }
+            freeSpace = newSize - currentUsed;
+        }
+    }
+
+    // 如果不需要扩容（仅丢弃数据后空间已够）
+    if (freeSpace >= required && newSize == bufSize) return;
+
     // 将数据整理为连续的（消除回绕）
     std::vector<char> newBuf(newSize, '\0');
 

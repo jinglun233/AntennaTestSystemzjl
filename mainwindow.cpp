@@ -91,15 +91,31 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    if (m_serverRunning) {
-        for (QTcpSocket *sock : m_clients) {
-            sock->disconnectFromHost();
-        }
-        if (m_tcpServer && m_tcpServer->isListening()) {
-            m_tcpServer->close();
-        }
+    // 停止所有定时器，防止析构期间触发槽函数
+    if (m_periodicCommandTimer) {
+        m_periodicCommandTimer->stop();
+    }
+    if (m_dateTimeTimer) {
+        m_dateTimeTimer->stop();
+    }
+
+    // 关闭 TCP 服务器，停止接受新连接
+    if (m_tcpServer && m_tcpServer->isListening()) {
+        m_tcpServer->close();
+    }
+
+    // 安全关闭所有客户端：
+    // 1. 先断开信号连接，防止 onClientDisconnected 中调用 deleteLater()
+    // 2. 再 abort() 强制立即关闭（比 disconnectFromHost 更确定，不等待事件循环）
+    // 3. 最后统一删除，避免 double-delete
+    for (QTcpSocket *sock : m_clients) {
+        disconnect(sock, nullptr, this, nullptr);
+        sock->abort();
     }
     qDeleteAll(m_clients);
+    m_clients.clear();
+    m_clientBuffers.clear();
+
     delete m_tcpServer;
     delete ui;
 }
@@ -449,7 +465,9 @@ bool MainWindow::sendFrame(QTcpSocket *client, quint8 command, const QByteArray 
  */
 void MainWindow::broadcastFrame(quint8 command, const QByteArray &payload)
 {
-    for (QTcpSocket *client : m_clients) {
+    // 拷贝客户端列表，防止发送过程中 onClientDisconnected 修改 m_clients
+    QVector<QTcpSocket*> clientsCopy = m_clients;
+    for (QTcpSocket *client : clientsCopy) {
         sendFrame(client, command, payload);
     }
 }
@@ -470,7 +488,8 @@ void MainWindow::onSendRawCommand(const QByteArray &command)
     // 构造可读的十六进制字符串用于日志显示
     QString hexStr = command.toHex(' ').toUpper();
 
-    for (QTcpSocket *client : m_clients) {
+    QVector<QTcpSocket*> clientsCopy = m_clients;
+    for (QTcpSocket *client : clientsCopy) {
         if (!client || client->state() != QTcpSocket::ConnectedState) continue;
 
         qint64 sent = client->write(command);
@@ -505,7 +524,8 @@ void MainWindow::onPeriodicCommandTimer()
 
     QByteArray periodicCmd = QByteArray::fromRawData("\xEB\x90\x02\xC0\x05", 5);
 
-    for (QTcpSocket *client : m_clients) {
+    QVector<QTcpSocket*> clientsCopy = m_clients;
+    for (QTcpSocket *client : clientsCopy) {
         // 仅向匹配目标IP的客户端发送
         if (client->peerAddress().toString() != m_targetClientIP) continue;
         if (!client || client->state() != QTcpSocket::ConnectedState) continue;
@@ -612,6 +632,18 @@ void MainWindow::appendLog(const QString &message)
 {
     QString timestamp = QDateTime::currentDateTime().toString("[hh:mm:ss]");
     ui->logPlainTextEdit->appendPlainText(timestamp + " " + message);
+
+    // 限制最大行数，防止长时间运行后内存无限增长
+    constexpr int MAX_LOG_LINES = 5000;
+    QTextDocument *doc = ui->logPlainTextEdit->document();
+    if (doc->blockCount() > MAX_LOG_LINES) {
+        QTextCursor cursor(doc);
+        cursor.movePosition(QTextCursor::Start);
+        cursor.select(QTextCursor::BlockUnderCursor);
+        cursor.removeSelectedText();
+        cursor.deleteChar(); // 删除换行符
+    }
+
     QTextCursor cursor = ui->logPlainTextEdit->textCursor();
     cursor.movePosition(QTextCursor::End);
     ui->logPlainTextEdit->setTextCursor(cursor);
