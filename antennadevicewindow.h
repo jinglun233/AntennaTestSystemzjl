@@ -57,7 +57,6 @@ private slots:
     void on_stopPRFButton_clicked();
     void on_waveControlSendButton_clicked();
     void on_testParamDownloadButton_clicked();
-    void on_autoTestButton_clicked();
     void initTelemetryTables();
 
     void on_startButton_clicked();

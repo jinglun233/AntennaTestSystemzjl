@@ -275,9 +275,7 @@ void AntennaDeviceWindow::on_prfDownloadButton_clicked()
     QMessageBox::information(this, "完成", "PRF 参数已下发。");
 }
 
-void AntennaDeviceWindow::on_testParamDownloadButton_clicked() {}
-
-void AntennaDeviceWindow::on_autoTestButton_clicked()
+void AntennaDeviceWindow::on_testParamDownloadButton_clicked()
 {
     bool ok;
 
@@ -355,7 +353,6 @@ void AntennaDeviceWindow::on_autoTestButton_clicked()
 
     QMessageBox::information(this, "完成", "测试参数已下发。");
 }
-
 
 void AntennaDeviceWindow::on_antennaPowerOnButton_clicked()
 {
