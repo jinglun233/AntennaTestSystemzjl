@@ -14,8 +14,8 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-    // 加载全局样式表
-    QFile qssFile(":/modernstyle.qss");
+    // 加载 qt-material 样式表
+    QFile qssFile(":/qt_material.qss");
     if (qssFile.open(QFile::ReadOnly | QFile::Text)) {
         a.setStyleSheet(qssFile.readAll());
         qssFile.close();
