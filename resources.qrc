@@ -2,5 +2,6 @@
 <RCC version="1.0">
 <qresource prefix="/">
     <file alias="file.svg">resources/file.svg</file>
+    <file alias="modernstyle.qss">resources/modernstyle.qss</file>
 </qresource>
 </RCC>

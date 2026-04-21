@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QFile>
 
 int main(int argc, char *argv[])
 {
@@ -12,6 +13,14 @@ int main(int argc, char *argv[])
     qputenv("QT_SCALE_FACTOR_ROUNDING_POLICY", "PassThrough");
 
     QApplication a(argc, argv);
+
+    // 加载全局样式表
+    QFile qssFile(":/modernstyle.qss");
+    if (qssFile.open(QFile::ReadOnly | QFile::Text)) {
+        a.setStyleSheet(qssFile.readAll());
+        qssFile.close();
+    }
+
     MainWindow w;
     w.show();
     return a.exec();
