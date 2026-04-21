@@ -1,0 +1,4272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>antennadevicewindow</class>
+ <widget class="QWidget" name="antennadevicewindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1173</width>
+    <height>815</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="leftMargin">
+    <number>4</number>
+   </property>
+   <property name="topMargin">
+    <number>4</number>
+   </property>
+   <property name="rightMargin">
+    <number>4</number>
+   </property>
+   <property name="bottomMargin">
+    <number>4</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <widget class="QGroupBox" name="controlGroup">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>180</width>
+         <height>260</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::WheelFocus</enum>
+       </property>
+       <property name="title">
+        <string>控制</string>
+       </property>
+       <layout class="QGridLayout" name="controlLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="antennaPowerOnButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>天线加电</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="antennaPowerOffButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>天线断电</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="thermalPowerOnButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>热控加电</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="thermalPowerOffButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>热控断电</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="monitorPowerOnButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>监控加电</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="monitorPowerOffButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>监控断电</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="startButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>开始</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QPushButton" name="stopButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>结束</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="waveControlGroup">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>230</width>
+         <height>260</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::WheelFocus</enum>
+       </property>
+       <property name="title">
+        <string>波控操作</string>
+       </property>
+       <layout class="QGridLayout" name="waveControlLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLineEdit" name="wave2DFilePathEdit">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="placeholderText">
+           <string>二维波控文件路径</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="wave2DFileButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/file.svg</normaloff>:/file.svg</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>35</width>
+            <height>35</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="wave2DUploadButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>二维波控上注</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="wave2DReadButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>回读</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLineEdit" name="basicParamFilePathEdit">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="placeholderText">
+           <string>全计算基本参数路径</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="basicParamFileButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/file.svg</normaloff>:/file.svg</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>35</width>
+            <height>35</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="basicParamUploadButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>全计算基本参数上注</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QPushButton" name="basicParamReadButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>回读</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLineEdit" name="layoutCtrlFilePathEdit">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="placeholderText">
+           <string>全计算布控路径</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QPushButton" name="layoutCtrlFileButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/file.svg</normaloff>:/file.svg</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>35</width>
+            <height>35</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QPushButton" name="layoutCtrlUploadButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>全计算布控上注</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QPushButton" name="layoutCtrlReadButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>回读</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="debugCommandGroup">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>260</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::WheelFocus</enum>
+       </property>
+       <property name="title">
+        <string>调试指令</string>
+       </property>
+       <layout class="QVBoxLayout" name="debugCommandLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QPushButton" name="startPRFButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>开始PRF</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="stopPRFButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>结束PRF</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="waveControlSendButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>波控码下发</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="waveControlSendButton_2">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>全计算下发</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="waveControlSendButton_3">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>布控下发</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="prfParamGroup">
+       <property name="maximumSize">
+        <size>
+         <width>220</width>
+         <height>260</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::WheelFocus</enum>
+       </property>
+       <property name="title">
+        <string>PRF参数</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="prfValueLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>PRF:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="prfValueLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>4000</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="dutyCycleLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>占空比:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="dutyCycleLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>10.00</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="dutyCycleLabel_2">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>％</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="pulseWidthLabel">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>50</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>脉宽:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="pulseWidthLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>25</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="pulseWidthLabel_2">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>us</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="protectionLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>50</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>保护:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="protectionComboBox">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>开启</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>关闭</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLabel" name="totalCountLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>PRF总数:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="pulseWidthLineEdit_2">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>1000</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="prfDownloadButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="text">
+           <string>PRF参数下发</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="testParamGroup">
+       <property name="maximumSize">
+        <size>
+         <width>250</width>
+         <height>260</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::WheelFocus</enum>
+       </property>
+       <property name="title">
+        <string>测试参数</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="wavePosLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>波位数量:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="polarizationLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>极化方式:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="polarizationComboBox">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>单极化HH</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>单极化HV</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>单极化VH</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>单极化VV</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>双极化H</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>双极化V</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>四极化</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>简缩极化</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>连续接收</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="testModeLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>收发测试:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="testModeComboBox">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>发射测试</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>接收测试</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="testModeLabel_2">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>测试模式:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="testModeComboBox_2">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>单板模式</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>暗室多波位PRX模式</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>暗室单波位PRX模式</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>暗室多波位PTX模式</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>暗室单波位PTX模式</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>轻小型DTR定标模式</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>轻小型普通模式</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="clockSettingLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>波控时钟设置:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="clockSettingComboBox">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>3.125MHz</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>5MHz</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>6.25MHz</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>10MHz</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="wavePoslineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>1</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QLabel" name="bukongSettingLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>布控模式：</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="bukongSettingComboBox">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>二维波控</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>全计算</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="testParamDownloadButton">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>28</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::WheelFocus</enum>
+            </property>
+            <property name="text">
+             <string>测试参数下发</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_9">
+      <property name="spacing">
+       <number>6</number>
+      </property>
+      <property name="leftMargin">
+       <number>3</number>
+      </property>
+      <property name="topMargin">
+       <number>3</number>
+      </property>
+      <property name="rightMargin">
+       <number>3</number>
+      </property>
+      <property name="bottomMargin">
+       <number>3</number>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>波控地检电压</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="waveGroundVoltageEdit">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;V&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;测控温设备电压&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="temperatureDeviceVoltageEdit">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_5">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;V&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;电子设备电压&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="electronicDeviceVoltageEdit">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_6">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;V&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>670</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="telemetryTabWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Times New Roman</family>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::WheelFocus</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="telemetryTab1">
+      <attribute name="title">
+       <string>遥测1</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <property name="spacing">
+        <number>3</number>
+       </property>
+       <property name="leftMargin">
+        <number>3</number>
+       </property>
+       <property name="topMargin">
+        <number>3</number>
+       </property>
+       <property name="rightMargin">
+        <number>3</number>
+       </property>
+       <property name="bottomMargin">
+        <number>3</number>
+       </property>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable1_1">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控1 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控1 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控1 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控1 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控1 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控1 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控1 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控1 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控1 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控1 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控1 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控1 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控1 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控1 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控1 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable1_2">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控2 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控2 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控2 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控2 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控2 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控2 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控2 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控2 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控2 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控2 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控2 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控2 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控2 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控2 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控2 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable1_3">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控1 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控1 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控1 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控1 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控1 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控1 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控1 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控1 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控1 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控1 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控1 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控1 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控1 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控1 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控1 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable1_4">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控1 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控1 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控1 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控1 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控1 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控1 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控1 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控1 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控1 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控1 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控1 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控1 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控1 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控1 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控1 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable1_5">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控1 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控1 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控1 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控1 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控1 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控1 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控1 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控1 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控1 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控1 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控1 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控1 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控1 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控1 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控1 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable1_6">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控1 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控1 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控1 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控1 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控1 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控1 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控1 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控1 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控1 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控1 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控1 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控1 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控1 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控1 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控1 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="telemetryTab2">
+      <attribute name="title">
+       <string>遥测2</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <property name="spacing">
+        <number>3</number>
+       </property>
+       <property name="leftMargin">
+        <number>3</number>
+       </property>
+       <property name="topMargin">
+        <number>3</number>
+       </property>
+       <property name="rightMargin">
+        <number>3</number>
+       </property>
+       <property name="bottomMargin">
+        <number>3</number>
+       </property>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable2_1">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控1 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控1 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控1 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控1 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控1 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控1 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控1 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控1 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控1 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控1 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控1 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控1 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控1 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控1 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控1 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable2_2">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控2 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控2 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控2 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控2 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控2 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控2 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控2 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控2 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控2 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控2 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控2 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控2 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控2 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控2 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控2 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable2_3">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控1 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控1 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控1 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控1 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控1 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控1 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控1 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控1 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控1 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控1 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控1 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控1 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控1 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控1 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控1 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable2_4">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控1 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控1 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控1 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控1 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控1 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控1 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控1 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控1 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控1 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控1 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控1 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控1 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控1 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控1 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控1 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable2_5">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控1 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控1 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控1 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控1 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控1 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控1 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控1 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控1 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控1 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控1 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控1 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控1 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控1 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控1 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控1 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="telemetryTable2_6">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>15</number>
+         </property>
+         <property name="columnCount">
+          <number>2</number>
+         </property>
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>名称</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>数值</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>波控1 +5V1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>波控1 -5V1</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>波控1 +5V2</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>波控1 -5V2</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>波控1 28V1</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>波控1 28V2</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>波控1 TR组件1</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>波控1 TR组件2</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>波控1 TR组件3</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>波控1 TR组件4</string>
+          </property>
+         </item>
+         <item row="10" column="0">
+          <property name="text">
+           <string>波控1 TR组件5</string>
+          </property>
+         </item>
+         <item row="11" column="0">
+          <property name="text">
+           <string>波控1 TR组件6</string>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string>波控1 TR组件7</string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string>波控1 TR组件8</string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string>波控1 数字遥测</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
