@@ -190,24 +190,6 @@ void AntennaDeviceWindow::parseWaveControlTelemetry(const QByteArray &payload)
 
 
 
-void AntennaDeviceWindow::on_connectButton_clicked() {}
-
-void AntennaDeviceWindow::on_monitorPowerOnButton_clicked() {}
-
-void AntennaDeviceWindow::on_monitorPowerOffButton_clicked() {}
-
-void AntennaDeviceWindow::on_waveControlFileButton_clicked() {}
-
-void AntennaDeviceWindow::on_waveControlUploadButton_clicked() {}
-
-void AntennaDeviceWindow::on_waveControlReadButton_clicked() {}
-
-void AntennaDeviceWindow::on_wave2DReadButton_clicked() {}
-
-void AntennaDeviceWindow::on_basicParamReadButton_clicked() {}
-
-void AntennaDeviceWindow::on_layoutCtrlReadButton_clicked() {}
-
 void AntennaDeviceWindow::on_startPRFButton_clicked() {
 
     QByteArray command = QByteArray::fromRawData("\xEB\x90\x01\xF1\x05", 5);

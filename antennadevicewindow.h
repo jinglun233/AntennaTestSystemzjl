@@ -27,31 +27,22 @@ signals:
     void sendRawCommandToServer(const QByteArray &command);  // 向服务端发送原始控制指令
 
 private slots:
-    void on_connectButton_clicked();
     void on_antennaPowerOnButton_clicked();
     void on_antennaPowerOffButton_clicked();
     void on_thermalPowerOnButton_clicked();
     void on_thermalPowerOffButton_clicked();
-    void on_monitorPowerOnButton_clicked();
-    void on_monitorPowerOffButton_clicked();
-    void on_waveControlFileButton_clicked();
-    void on_waveControlUploadButton_clicked();
-    void on_waveControlReadButton_clicked();
 
     // 二维波控操作
     void on_wave2DFileButton_clicked();
     void on_wave2DUploadButton_clicked();
-    void on_wave2DReadButton_clicked();
 
     // 全计算基本参数操作
     void on_basicParamFileButton_clicked();
     void on_basicParamUploadButton_clicked();
-    void on_basicParamReadButton_clicked();
 
     // 全计算布控操作
     void on_layoutCtrlFileButton_clicked();
     void on_layoutCtrlUploadButton_clicked();
-    void on_layoutCtrlReadButton_clicked();
     void on_prfDownloadButton_clicked();
     void on_startPRFButton_clicked();
     void on_stopPRFButton_clicked();
