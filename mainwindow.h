@@ -61,6 +61,10 @@ private:
     int m_maxClients;
     bool m_serverRunning;
 
+    // ========== TCP 客户端相关（模式0：天线地检模式作为客户端） ==========
+    QTcpSocket *m_clientSocket;   // 客户端模式下的主动连接 socket
+    bool m_clientConnected;       // 客户端连接状态
+
     // ========== 数据收发相关 ==========
     /**
      * @brief 每个客户端对应一个环形缓冲区
@@ -87,6 +91,12 @@ private slots:
     void onClientDataReady();          // TCP 数据到达 → 写入环形缓冲 → 尝试解析帧
     void onSendRawCommand(const QByteArray &command);  // 接收子窗口原始指令，广播给所有客户端
     void onPeriodicCommandTimer();                     // 周期性指令定时器回调（1s）
+
+    // ========== 客户端模式槽函数 ==========
+    void onConnectClientClicked();
+    void onDisconnectClientClicked();
+    void onClientSocketReadyRead();
+    void onClientSocketDisconnected();
 
 private:
     // ========== UI 辅助方法 ==========

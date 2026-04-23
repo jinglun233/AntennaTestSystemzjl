@@ -23,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_serverRunning = false;
     m_tcpServer = nullptr;
     m_maxClients = 0;
+    m_clientSocket = nullptr;
+    m_clientConnected = false;
 
     // ========== 周期性指令定时器初始化（1秒周期，不自动启动） ==========
     m_periodicCommandTimer = new QTimer(this);
@@ -80,6 +82,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->startServerButton, &QPushButton::clicked, this, &MainWindow::onStartServerClicked);
     connect(ui->stopServerButton, &QPushButton::clicked, this, &MainWindow::onStopServerClicked);
 
+    // 客户端设置按钮信号槽
+    connect(ui->connectClientButton, &QPushButton::clicked, this, &MainWindow::onConnectClientClicked);
+    connect(ui->disconnectClientButton, &QPushButton::clicked, this, &MainWindow::onDisconnectClientClicked);
+
     // ========== 子窗口信号槽连接 ==========
     connect(m_antennaDeviceWindow, &AntennaDeviceWindow::sendRawCommandToServer,
             this,      &MainWindow::onSendRawCommand);
@@ -104,10 +110,7 @@ MainWindow::~MainWindow()
         m_tcpServer->close();
     }
 
-    // 安全关闭所有客户端：
-    // 1. 先断开信号连接，防止 onClientDisconnected 中调用 deleteLater()
-    // 2. 再 abort() 强制立即关闭（比 disconnectFromHost 更确定，不等待事件循环）
-    // 3. 最后统一删除，避免 double-delete
+    // 安全关闭所有服务端客户端
     for (QTcpSocket *sock : m_clients) {
         disconnect(sock, nullptr, this, nullptr);
         sock->abort();
@@ -115,6 +118,13 @@ MainWindow::~MainWindow()
     qDeleteAll(m_clients);
     m_clients.clear();
     m_clientBuffers.clear();
+
+    // 安全关闭客户端 socket
+    if (m_clientSocket) {
+        disconnect(m_clientSocket, nullptr, this, nullptr);
+        m_clientSocket->abort();
+        m_clientSocket->deleteLater();
+    }
 
     delete m_tcpServer;
     delete ui;
@@ -128,15 +138,41 @@ void MainWindow::updateUIState()
 {
     bool modeSelected = (m_currentMode != WorkMode::None);
 
-    ui->modeComboBox->setEnabled(!m_serverRunning);
-    ui->confirmModeButton->setEnabled(!modeSelected && !m_serverRunning);
-    ui->cancelModeButton->setEnabled(modeSelected && !m_serverRunning);
+    ui->modeComboBox->setEnabled(!m_serverRunning && !m_clientConnected);
+    ui->confirmModeButton->setEnabled(!modeSelected && !m_serverRunning && !m_clientConnected);
+    ui->cancelModeButton->setEnabled(modeSelected && !m_serverRunning && !m_clientConnected);
 
+    // 根据模式控制服务器/客户端设置 GroupBox 的可见性
+    switch (m_currentMode) {
+    case WorkMode::None:
+        ui->serverGroupBox->setVisible(false);
+        ui->serverGroupBox_2->setVisible(false);
+        break;
+    case WorkMode::AntennaGroundTest:
+        // 模式0：只显示客户端设置（作为客户端连接外部服务器）
+        ui->serverGroupBox->setVisible(false);
+        ui->serverGroupBox_2->setVisible(true);
+        break;
+    case WorkMode::SimulateDevice:
+        // 模式1：同时显示服务器设置和客户端设置
+        ui->serverGroupBox->setVisible(true);
+        ui->serverGroupBox_2->setVisible(true);
+        break;
+    }
+
+    // 服务器控件状态
     bool serverControlsEnabled = modeSelected && !m_serverRunning;
     ui->ipLineEdit->setEnabled(serverControlsEnabled);
     ui->portSpinBox->setEnabled(serverControlsEnabled);
     ui->startServerButton->setEnabled(modeSelected && !m_serverRunning);
     ui->stopServerButton->setEnabled(m_serverRunning);
+
+    // 客户端控件状态
+    bool clientControlsEnabled = modeSelected && !m_clientConnected;
+    ui->clientIpLineEdit->setEnabled(clientControlsEnabled);
+    ui->clientPortSpinBox->setEnabled(clientControlsEnabled);
+    ui->connectClientButton->setEnabled(modeSelected && !m_clientConnected);
+    ui->disconnectClientButton->setEnabled(m_clientConnected);
 
     updateModeStatusLabel();
 }
@@ -280,6 +316,116 @@ void MainWindow::onStopServerClicked()
     m_targetClientIP.clear();
     updateUIState();
     appendLog("--- 已手动停止服务器（周期性指令已停止） ---");
+}
+
+// ============================================================================
+//                         TCP 客户端连接/断开（客户端模式）
+// ============================================================================
+
+void MainWindow::onConnectClientClicked()
+{
+    QString ip = ui->clientIpLineEdit->text().trimmed();
+    quint16 port = static_cast<quint16>(ui->clientPortSpinBox->value());
+
+    if (ip.isEmpty()) {
+        QMessageBox::warning(this, "错误", "请输入服务器 IP 地址！");
+        return;
+    }
+
+    QHostAddress addr(ip);
+    if (addr.isNull()) {
+        QMessageBox::warning(this, "错误", "IP 地址格式无效！");
+        return;
+    }
+
+    if (!m_clientSocket) {
+        m_clientSocket = new QTcpSocket(this);
+        connect(m_clientSocket, &QTcpSocket::readyRead,
+                this, &MainWindow::onClientSocketReadyRead);
+        connect(m_clientSocket, &QTcpSocket::disconnected,
+                this, &MainWindow::onClientSocketDisconnected);
+    }
+
+    m_clientSocket->connectToHost(addr, port);
+    if (!m_clientSocket->waitForConnected(3000)) {
+        QMessageBox::critical(this, "错误",
+                              QString("无法连接到服务器！\n%1").arg(m_clientSocket->errorString()));
+        appendLog(QString("[ERROR] 客户端连接失败：%1").arg(m_clientSocket->errorString()));
+        return;
+    }
+
+    m_clientConnected = true;
+
+    // 为客户端 socket 创建环形缓冲区
+    auto buffer = std::make_shared<RingBuffer>(128 * 1024);
+    m_clientBuffers.insert(m_clientSocket, buffer);
+
+    updateUIState();
+    appendLog(QString("[成功] 已连接到服务器 %1:%2").arg(ip).arg(port));
+}
+
+void MainWindow::onDisconnectClientClicked()
+{
+    if (!m_clientConnected || !m_clientSocket) return;
+
+    m_clientSocket->disconnectFromHost();
+    // 实际断开逻辑在 onClientSocketDisconnected 中处理
+}
+
+void MainWindow::onClientSocketReadyRead()
+{
+    if (!m_clientSocket || !m_clientBuffers.contains(m_clientSocket)) return;
+
+    // 与服务端接收逻辑统一：读取数据 → 写入环形缓冲 → 解析帧
+    QByteArray rawData = m_clientSocket->readAll();
+    if (rawData.isEmpty()) return;
+
+    auto &ringBuf = m_clientBuffers[m_clientSocket];
+    size_t written = ringBuf->write(rawData);
+    Q_UNUSED(written);
+
+    // 循环解析完整帧
+    while (true) {
+        size_t available = ringBuf->readableBytes();
+        if (!ProtocolCodec::hasCompleteFrame(static_cast<int>(available))) {
+            break;
+        }
+
+        size_t peekSize = std::min(available, static_cast<size_t>(65536));
+        QByteArray preview = ringBuf->peek(peekSize);
+        if (preview.isEmpty()) break;
+
+        DataFrame frame;
+        int consumed = 0;
+        bool parsed = ProtocolCodec::parse(preview, frame, consumed);
+
+        if (!parsed) {
+            if (consumed > 0) {
+                ringBuf->consume(static_cast<size_t>(consumed));
+                continue;
+            } else {
+                break;
+            }
+        }
+
+        ringBuf->consume(static_cast<size_t>(consumed));
+        handleReceivedFrame(m_clientSocket, frame);
+    }
+}
+
+void MainWindow::onClientSocketDisconnected()
+{
+    if (!m_clientSocket) return;
+
+    QString info = QString("%1:%2")
+                   .arg(m_clientSocket->peerAddress().toString())
+                   .arg(m_clientSocket->peerPort());
+
+    m_clientBuffers.remove(m_clientSocket);
+    m_clientConnected = false;
+
+    updateUIState();
+    appendLog(QString("[断开] 与服务器的连接已断开：%1").arg(info));
 }
 
 // ============================================================================
@@ -480,29 +626,45 @@ void MainWindow::broadcastFrame(quint8 command, const QByteArray &payload)
  */
 void MainWindow::onSendRawCommand(const QByteArray &command)
 {
-    if (!m_serverRunning || m_clients.isEmpty()) {
-        appendLog("[指令] 服务器未运行或无客户端连接，无法发送指令");
-        return;
-    }
-
     // 构造可读的十六进制字符串用于日志显示
     QString hexStr = command.toHex(' ').toUpper();
+    bool sentAny = false;
 
-    QVector<QTcpSocket*> clientsCopy = m_clients;
-    for (QTcpSocket *client : clientsCopy) {
-        if (!client || client->state() != QTcpSocket::ConnectedState) continue;
-
-        qint64 sent = client->write(command);
-        if (sent != command.size()) {
-            appendLog(QString("[指令异常→%1] 只写出 %2/%3 字节")
-                      .arg(clientPeerLabel(client)).arg(sent).arg(command.size()));
-        } else {
-            client->flush();
-            appendLog(QString("[指令发送→%1] %2 字节 [%3]")
-                      .arg(clientPeerLabel(client))
-                      .arg(command.size())
-                      .arg(hexStr));
+    // 1. 如果有客户端连接（客户端模式），通过 clientSocket 发送
+    if (m_clientConnected && m_clientSocket
+        && m_clientSocket->state() == QTcpSocket::ConnectedState) {
+        qint64 sent = m_clientSocket->write(command);
+        if (sent == command.size()) {
+            m_clientSocket->flush();
+            appendLog(QString("[指令发送→服务器] %1 字节 [%2]")
+                      .arg(command.size()).arg(hexStr));
+            sentAny = true;
         }
+    }
+
+    // 2. 如果有服务端客户端连接（服务器模式），广播发送
+    if (m_serverRunning && !m_clients.isEmpty()) {
+        QVector<QTcpSocket*> clientsCopy = m_clients;
+        for (QTcpSocket *client : clientsCopy) {
+            if (!client || client->state() != QTcpSocket::ConnectedState) continue;
+
+            qint64 sent = client->write(command);
+            if (sent != command.size()) {
+                appendLog(QString("[指令异常→%1] 只写出 %2/%3 字节")
+                          .arg(clientPeerLabel(client)).arg(sent).arg(command.size()));
+            } else {
+                client->flush();
+                appendLog(QString("[指令发送→%1] %2 字节 [%3]")
+                          .arg(clientPeerLabel(client))
+                          .arg(command.size())
+                          .arg(hexStr));
+                sentAny = true;
+            }
+        }
+    }
+
+    if (!sentAny) {
+        appendLog("[指令] 无可用连接，无法发送指令");
     }
 }
 
@@ -520,21 +682,31 @@ void MainWindow::onSendRawCommand(const QByteArray &command)
  */
 void MainWindow::onPeriodicCommandTimer()
 {
-    if (!m_serverRunning || m_clients.isEmpty()) return;
-
     QByteArray periodicCmd = QByteArray::fromRawData("\xEB\x90\x02\xC0\x05", 5);
 
-    QVector<QTcpSocket*> clientsCopy = m_clients;
-    for (QTcpSocket *client : clientsCopy) {
-        // 仅向匹配目标IP的客户端发送
-        if (client->peerAddress().toString() != m_targetClientIP) continue;
-        if (!client || client->state() != QTcpSocket::ConnectedState) continue;
-
-        qint64 sent = client->write(periodicCmd);
-        client->flush();
+    // 1. 客户端模式下，向服务器发送周期指令
+    if (m_clientConnected && m_clientSocket
+        && m_clientSocket->state() == QTcpSocket::ConnectedState) {
+        qint64 sent = m_clientSocket->write(periodicCmd);
+        m_clientSocket->flush();
         if (sent == periodicCmd.size()) {
-            appendLog(QString("[周期指令→%1] [EB 90 02 C0 05]")
-                      .arg(clientPeerLabel(client)));
+            appendLog("[周期指令→服务器] [EB 90 02 C0 05]");
+        }
+    }
+
+    // 2. 服务器模式下，向目标客户端发送周期指令
+    if (m_serverRunning && !m_clients.isEmpty()) {
+        QVector<QTcpSocket*> clientsCopy = m_clients;
+        for (QTcpSocket *client : clientsCopy) {
+            if (client->peerAddress().toString() != m_targetClientIP) continue;
+            if (!client || client->state() != QTcpSocket::ConnectedState) continue;
+
+            qint64 sent = client->write(periodicCmd);
+            client->flush();
+            if (sent == periodicCmd.size()) {
+                appendLog(QString("[周期指令→%1] [EB 90 02 C0 05]")
+                          .arg(clientPeerLabel(client)));
+            }
         }
     }
 }
