@@ -51,14 +51,20 @@ void AntennaDeviceWindow::updateDutyCycle()
 
 void AntennaDeviceWindow::onBukongSettingChanged(int index)
 {
-    bool enabled = (index != 0);
+    bool fullCompute = (index != 0);  // true=全计算模式, false=二维波控模式
 
-    ui->basicParamFileButton->setEnabled(enabled);
-    ui->basicParamFilePathEdit->setEnabled(enabled);
-    ui->basicParamUploadButton->setEnabled(enabled);
-    ui->layoutCtrlFileButton->setEnabled(enabled);
-    ui->layoutCtrlFilePathEdit->setEnabled(enabled);
-    ui->layoutCtrlUploadButton->setEnabled(enabled);
+    // 二维波控控件：仅在二维波控模式(index==0)下可用
+    ui->wave2DFileButton->setEnabled(!fullCompute);
+    ui->wave2DFilePathEdit->setEnabled(!fullCompute);
+    ui->wave2DUploadButton->setEnabled(!fullCompute);
+
+    // 全计算控件：仅在全计算模式(index!=0)下可用
+    ui->basicParamFileButton->setEnabled(fullCompute);
+    ui->basicParamFilePathEdit->setEnabled(fullCompute);
+    ui->basicParamUploadButton->setEnabled(fullCompute);
+    ui->layoutCtrlFileButton->setEnabled(fullCompute);
+    ui->layoutCtrlFilePathEdit->setEnabled(fullCompute);
+    ui->layoutCtrlUploadButton->setEnabled(fullCompute);
 }
 
 void AntennaDeviceWindow::initTelemetryTables()
