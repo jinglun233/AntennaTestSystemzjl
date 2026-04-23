@@ -23,6 +23,11 @@ AntennaDeviceWindow::AntennaDeviceWindow(QWidget *parent)
 
     connect(ui->prfValueLineEdit, &QLineEdit::textChanged, this, &AntennaDeviceWindow::updateDutyCycle);
     connect(ui->pulseWidthLineEdit, &QLineEdit::textChanged, this, &AntennaDeviceWindow::updateDutyCycle);
+
+    // 布控模式切换时控制全计算相关控件的可用状态
+    connect(ui->bukongSettingComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &AntennaDeviceWindow::onBukongSettingChanged);
+    onBukongSettingChanged(ui->bukongSettingComboBox->currentIndex());
 }
 
 AntennaDeviceWindow::~AntennaDeviceWindow()
@@ -42,6 +47,18 @@ void AntennaDeviceWindow::updateDutyCycle()
     } else {
         ui->dutyCycleLineEdit->setText("");
     }
+}
+
+void AntennaDeviceWindow::onBukongSettingChanged(int index)
+{
+    bool enabled = (index != 0);
+
+    ui->basicParamFileButton->setEnabled(enabled);
+    ui->basicParamFilePathEdit->setEnabled(enabled);
+    ui->basicParamUploadButton->setEnabled(enabled);
+    ui->layoutCtrlFileButton->setEnabled(enabled);
+    ui->layoutCtrlFilePathEdit->setEnabled(enabled);
+    ui->layoutCtrlUploadButton->setEnabled(enabled);
 }
 
 void AntennaDeviceWindow::initTelemetryTables()

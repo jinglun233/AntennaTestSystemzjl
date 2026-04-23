@@ -51,8 +51,8 @@ private slots:
     void initTelemetryTables();
 
     void on_startButton_clicked();
-
     void on_stopButton_clicked();
+    void onBukongSettingChanged(int index);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
