@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setWindowTitle("相控阵天线地面测试系统");
 
     // ========== 成员初始化 ==========
     m_currentMode = WorkMode::None;

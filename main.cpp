@@ -14,6 +14,9 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
+    // 设置应用程序全局图标
+    a.setWindowIcon(QIcon(":/appicon.ico"));
+
     // 加载全局样式表
     QFile qssFile(":/modernstyle.qss");
     if (qssFile.open(QFile::ReadOnly | QFile::Text)) {

@@ -3,5 +3,6 @@
 <qresource prefix="/">
     <file alias="file.svg">resources/file.svg</file>
     <file alias="modernstyle.qss">resources/modernstyle.qss</file>
+    <file alias="appicon.ico">resources/appicon.ico</file>
 </qresource>
 </RCC>
