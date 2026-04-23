@@ -283,24 +283,13 @@ void MainWindow::onStartServerClicked()
     // 保存目标客户端IP（即监听IP，用于周期性指令定向发送）
     m_targetClientIP = "127.0.0.1";
 
-    // 启动周期性指令定时器（1秒间隔）
-    if (!m_periodicCommandTimer->isActive()) {
-        m_periodicCommandTimer->start(1000);
-    }
-
     appendLog(QString("[成功] 服务已启动，监听 %1:%2").arg(ip).arg(port));
-//    appendLog(QString("--- 周期性指令已启动（1s），目标IP: %1 ---").arg(m_targetClientIP));
     appendLog(QString("--- 等待客户端连接 ---").arg(m_maxClients));
 }
 
 void MainWindow::onStopServerClicked()
 {
     if (!m_serverRunning) return;
-
-    // 停止周期性指令定时器
-    if (m_periodicCommandTimer->isActive()) {
-        m_periodicCommandTimer->stop();
-    }
 
     for (QTcpSocket *sock : m_clients) {
         sock->disconnectFromHost();
@@ -315,7 +304,7 @@ void MainWindow::onStopServerClicked()
     m_serverRunning = false;
     m_targetClientIP.clear();
     updateUIState();
-    appendLog("--- 已手动停止服务器（周期性指令已停止） ---");
+    appendLog("--- 已手动停止服务器 ---");
 }
 
 // ============================================================================
@@ -360,6 +349,11 @@ void MainWindow::onConnectClientClicked()
     auto buffer = std::make_shared<RingBuffer>(128 * 1024);
     m_clientBuffers.insert(m_clientSocket, buffer);
 
+    // 启动周期性指令定时器（1秒间隔）—— 客户端模式下由客户端主动发送
+    if (!m_periodicCommandTimer->isActive()) {
+        m_periodicCommandTimer->start(1000);
+    }
+
     updateUIState();
     appendLog(QString("[成功] 已连接到服务器 %1:%2").arg(ip).arg(port));
 }
@@ -367,6 +361,11 @@ void MainWindow::onConnectClientClicked()
 void MainWindow::onDisconnectClientClicked()
 {
     if (!m_clientConnected || !m_clientSocket) return;
+
+    // 停止周期性指令定时器
+    if (m_periodicCommandTimer->isActive()) {
+        m_periodicCommandTimer->stop();
+    }
 
     m_clientSocket->disconnectFromHost();
     // 实际断开逻辑在 onClientSocketDisconnected 中处理
@@ -420,6 +419,11 @@ void MainWindow::onClientSocketDisconnected()
     QString info = QString("%1:%2")
                    .arg(m_clientSocket->peerAddress().toString())
                    .arg(m_clientSocket->peerPort());
+
+    // 停止周期性指令定时器
+    if (m_periodicCommandTimer->isActive()) {
+        m_periodicCommandTimer->stop();
+    }
 
     m_clientBuffers.remove(m_clientSocket);
     m_clientConnected = false;
@@ -628,9 +632,8 @@ void MainWindow::onSendRawCommand(const QByteArray &command)
 {
     // 构造可读的十六进制字符串用于日志显示
     QString hexStr = command.toHex(' ').toUpper();
-    bool sentAny = false;
 
-    // 1. 如果有客户端连接（客户端模式），通过 clientSocket 发送
+    // 客户端模式下，通过 clientSocket 向服务器发送指令
     if (m_clientConnected && m_clientSocket
         && m_clientSocket->state() == QTcpSocket::ConnectedState) {
         qint64 sent = m_clientSocket->write(command);
@@ -638,34 +641,11 @@ void MainWindow::onSendRawCommand(const QByteArray &command)
             m_clientSocket->flush();
             appendLog(QString("[指令发送→服务器] %1 字节 [%2]")
                       .arg(command.size()).arg(hexStr));
-            sentAny = true;
+            return;
         }
     }
 
-    // 2. 如果有服务端客户端连接（服务器模式），广播发送
-    if (m_serverRunning && !m_clients.isEmpty()) {
-        QVector<QTcpSocket*> clientsCopy = m_clients;
-        for (QTcpSocket *client : clientsCopy) {
-            if (!client || client->state() != QTcpSocket::ConnectedState) continue;
-
-            qint64 sent = client->write(command);
-            if (sent != command.size()) {
-                appendLog(QString("[指令异常→%1] 只写出 %2/%3 字节")
-                          .arg(clientPeerLabel(client)).arg(sent).arg(command.size()));
-            } else {
-                client->flush();
-                appendLog(QString("[指令发送→%1] %2 字节 [%3]")
-                          .arg(clientPeerLabel(client))
-                          .arg(command.size())
-                          .arg(hexStr));
-                sentAny = true;
-            }
-        }
-    }
-
-    if (!sentAny) {
-        appendLog("[指令] 无可用连接，无法发送指令");
-    }
+    appendLog("[指令] 无可用连接，无法发送指令");
 }
 
 // ============================================================================
@@ -684,29 +664,13 @@ void MainWindow::onPeriodicCommandTimer()
 {
     QByteArray periodicCmd = QByteArray::fromRawData("\xEB\x90\x02\xC0\x05", 5);
 
-    // 1. 客户端模式下，向服务器发送周期指令
+    // 客户端模式下，向服务器发送周期指令
     if (m_clientConnected && m_clientSocket
         && m_clientSocket->state() == QTcpSocket::ConnectedState) {
         qint64 sent = m_clientSocket->write(periodicCmd);
         m_clientSocket->flush();
         if (sent == periodicCmd.size()) {
             appendLog("[周期指令→服务器] [EB 90 02 C0 05]");
-        }
-    }
-
-    // 2. 服务器模式下，向目标客户端发送周期指令
-    if (m_serverRunning && !m_clients.isEmpty()) {
-        QVector<QTcpSocket*> clientsCopy = m_clients;
-        for (QTcpSocket *client : clientsCopy) {
-            if (client->peerAddress().toString() != m_targetClientIP) continue;
-            if (!client || client->state() != QTcpSocket::ConnectedState) continue;
-
-            qint64 sent = client->write(periodicCmd);
-            client->flush();
-            if (sent == periodicCmd.size()) {
-                appendLog(QString("[周期指令→%1] [EB 90 02 C0 05]")
-                          .arg(clientPeerLabel(client)));
-            }
         }
     }
 }
