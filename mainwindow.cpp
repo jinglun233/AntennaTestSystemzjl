@@ -146,17 +146,17 @@ void MainWindow::updateUIState()
     switch (m_currentMode) {
     case WorkMode::None:
         ui->serverGroupBox->setVisible(false);
-        ui->serverGroupBox_2->setVisible(false);
+        ui->clientGroupBox->setVisible(false);
         break;
     case WorkMode::AntennaGroundTest:
         // 模式0：只显示客户端设置（作为客户端连接外部服务器）
         ui->serverGroupBox->setVisible(false);
-        ui->serverGroupBox_2->setVisible(true);
+        ui->clientGroupBox->setVisible(true);
         break;
     case WorkMode::SimulateDevice:
         // 模式1：同时显示服务器设置和客户端设置
         ui->serverGroupBox->setVisible(true);
-        ui->serverGroupBox_2->setVisible(true);
+        ui->clientGroupBox->setVisible(true);
         break;
     }
 
