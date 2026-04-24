@@ -314,13 +314,13 @@
           <property name="minimumSize">
            <size>
             <width>130</width>
-            <height>32</height>
+            <height>40</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
             <width>130</width>
-            <height>32</height>
+            <height>40</height>
            </size>
           </property>
           <property name="font">
@@ -391,7 +391,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_data">
       <attribute name="title">

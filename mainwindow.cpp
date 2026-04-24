@@ -26,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_maxClients = 0;
     m_clientSocket = nullptr;
     m_clientConnected = false;
+    m_autoTestWindow = nullptr;
+    m_instrumentControlWindow = nullptr;
 
     // ========== 周期性指令定时器初始化（1秒周期，不自动启动） ==========
     m_periodicCommandTimer = new QTimer(this);
@@ -92,6 +94,21 @@ MainWindow::MainWindow(QWidget *parent)
             this,      &MainWindow::onSendRawCommand);
     connect(temperatureTab,       &TemperatureInfoWindow::sendRawCommandToServer,
             this,                 &MainWindow::onSendRawCommand);
+
+    // ========== 菜单栏信号槽连接 ==========
+    connect(ui->actionAutoTestWindow, &QAction::triggered, this, &MainWindow::onActionAutoTestWindow);
+    connect(ui->actionInstrumentControlWindow, &QAction::triggered, this, &MainWindow::onActionInstrumentControlWindow);
+    connect(ui->actionExit, &QAction::triggered, this, &MainWindow::onActionExit);
+    connect(ui->actionViewAntenna, &QAction::triggered, this, &MainWindow::onActionViewAntenna);
+    connect(ui->actionViewTemperature, &QAction::triggered, this, &MainWindow::onActionViewTemperature);
+    connect(ui->actionViewPower, &QAction::triggered, this, &MainWindow::onActionViewPower);
+    connect(ui->actionViewElectronic, &QAction::triggered, this, &MainWindow::onActionViewElectronic);
+    connect(ui->actionLogExport, &QAction::triggered, this, &MainWindow::onActionLogExport);
+    connect(ui->actionDataReplay, &QAction::triggered, this, &MainWindow::onActionDataReplay);
+    connect(ui->actionFirmwareUpgrade, &QAction::triggered, this, &MainWindow::onActionFirmwareUpgrade);
+    connect(ui->actionNetworkConfig, &QAction::triggered, this, &MainWindow::onActionNetworkConfig);
+    connect(ui->actionDataPathConfig, &QAction::triggered, this, &MainWindow::onActionDataPathConfig);
+    connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::onActionAbout);
 
     updateUIState();
 }
@@ -809,4 +826,87 @@ QString MainWindow::commandName(quint8 cmd)
 //    case Protocol::Cmd::ERROR_REPORT:   return "错误报告";
     default:                            return QString("0x%1").arg(cmd, 2, 16, QLatin1Char('0'));
     }
+}
+
+// ============================================================================
+//                         菜单栏功能实现
+// ============================================================================
+
+void MainWindow::onActionAutoTestWindow()
+{
+    if (!m_autoTestWindow) {
+        m_autoTestWindow = new AutoTestWindow(this);
+    }
+    m_autoTestWindow->show();
+    m_autoTestWindow->raise();
+    m_autoTestWindow->activateWindow();
+}
+
+void MainWindow::onActionInstrumentControlWindow()
+{
+    if (!m_instrumentControlWindow) {
+        m_instrumentControlWindow = new InstrumentControlWindow(this);
+    }
+    m_instrumentControlWindow->show();
+    m_instrumentControlWindow->raise();
+    m_instrumentControlWindow->activateWindow();
+}
+
+void MainWindow::onActionExit()
+{
+    close();
+}
+
+void MainWindow::onActionViewAntenna()
+{
+    ui->telemetryTabWidget->setCurrentIndex(0);
+}
+
+void MainWindow::onActionViewTemperature()
+{
+    ui->telemetryTabWidget->setCurrentIndex(1);
+}
+
+void MainWindow::onActionViewPower()
+{
+    ui->telemetryTabWidget->setCurrentIndex(2);
+}
+
+void MainWindow::onActionViewElectronic()
+{
+    ui->telemetryTabWidget->setCurrentIndex(3);
+}
+
+void MainWindow::onActionLogExport()
+{
+    appendLog("[菜单] 日志导出功能暂未实现");
+}
+
+void MainWindow::onActionDataReplay()
+{
+    appendLog("[菜单] 数据回放功能暂未实现");
+}
+
+void MainWindow::onActionFirmwareUpgrade()
+{
+    appendLog("[菜单] 固件升级功能暂未实现");
+}
+
+void MainWindow::onActionNetworkConfig()
+{
+    appendLog("[菜单] 网络设置功能暂未实现");
+}
+
+void MainWindow::onActionDataPathConfig()
+{
+    appendLog("[菜单] 数据保存路径功能暂未实现");
+}
+
+void MainWindow::onActionAbout()
+{
+    QMessageBox::about(this, "关于",
+        "<h2>相控阵天线地面测试系统</h2>"
+        "<p>版本：v1.0.0</p>"
+        "<p>版权所有 © 2025 齐鲁空天信息研究院</p>"
+        "<p>保留所有权利</p>");
 }

@@ -18,6 +18,8 @@
 #include "electronicdevicewindow.h"
 #include "temperatureinfowindow.h"
 #include "powervoltagewindow.h"
+#include "autotestwindow.h"
+#include "instrumentcontrolwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -80,6 +82,10 @@ private:
     TemperatureInfoWindow *temperatureTab;
     PowerVoltageWindow *powerTab;
 
+    // ========== 菜单子窗口 ==========
+    AutoTestWindow *m_autoTestWindow;
+    InstrumentControlWindow *m_instrumentControlWindow;
+
 private slots:
     void updateDateTime();
     void onConfirmModeClicked();
@@ -97,6 +103,21 @@ private slots:
     void onDisconnectClientClicked();
     void onClientSocketReadyRead();
     void onClientSocketDisconnected();
+
+    // ========== 菜单栏槽函数 ==========
+    void onActionAutoTestWindow();
+    void onActionInstrumentControlWindow();
+    void onActionExit();
+    void onActionViewAntenna();
+    void onActionViewTemperature();
+    void onActionViewPower();
+    void onActionViewElectronic();
+    void onActionLogExport();
+    void onActionDataReplay();
+    void onActionFirmwareUpgrade();
+    void onActionNetworkConfig();
+    void onActionDataPathConfig();
+    void onActionAbout();
 
 private:
     // ========== UI 辅助方法 ==========

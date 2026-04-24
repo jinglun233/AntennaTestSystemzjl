@@ -15,10 +15,12 @@ win32 {
 
 SOURCES += \
     antennadevicewindow.cpp \
+    autotestwindow.cpp \
     customtabbar.cpp \
     customtabwidget.cpp \
     dataprotocol.cpp \
     electronicdevicewindow.cpp \
+    instrumentcontrolwindow.cpp \
     main.cpp \
     mainwindow.cpp \
     powervoltagewindow.cpp \
@@ -28,10 +30,12 @@ SOURCES += \
 
 HEADERS += \
     antennadevicewindow.h \
+    autotestwindow.h \
     customtabbar.h \
     customtabwidget.h \
     dataprotocol.h \
     electronicdevicewindow.h \
+    instrumentcontrolwindow.h \
     mainwindow.h \
     powervoltagewindow.h \
     qcustomplot.h \
@@ -40,7 +44,9 @@ HEADERS += \
 
 FORMS += \
     antennadevicewindow.ui \
+    autotestwindow.ui \
     electronicdevicewindow.ui \
+    instrumentcontrolwindow.ui \
     mainwindow.ui \
     powervoltagewindow.ui \
     temperatureinfowindow.ui
