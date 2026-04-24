@@ -1,3 +1,4 @@
+void on_actionAbout_triggered();
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -107,12 +108,8 @@ private slots:
     // ========== 菜单栏槽函数 ==========
     void onActionAutoTestWindow();
     void onActionInstrumentControlWindow();
+    void onActionPatternSimulation();
     void onActionExit();
-    void onActionViewAntenna();
-    void onActionViewTemperature();
-    void onActionViewPower();
-    void onActionViewElectronic();
-    void onActionLogExport();
     void onActionDataReplay();
     void onActionFirmwareUpgrade();
     void onActionNetworkConfig();

@@ -99,12 +99,8 @@ MainWindow::MainWindow(QWidget *parent)
     // ========== 菜单栏信号槽连接 ==========
     connect(ui->actionAutoTestWindow, &QAction::triggered, this, &MainWindow::onActionAutoTestWindow);
     connect(ui->actionInstrumentControlWindow, &QAction::triggered, this, &MainWindow::onActionInstrumentControlWindow);
+    connect(ui->actionPatternSimulation, &QAction::triggered, this, &MainWindow::onActionPatternSimulation);
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::onActionExit);
-    connect(ui->actionViewAntenna, &QAction::triggered, this, &MainWindow::onActionViewAntenna);
-    connect(ui->actionViewTemperature, &QAction::triggered, this, &MainWindow::onActionViewTemperature);
-    connect(ui->actionViewPower, &QAction::triggered, this, &MainWindow::onActionViewPower);
-    connect(ui->actionViewElectronic, &QAction::triggered, this, &MainWindow::onActionViewElectronic);
-    connect(ui->actionLogExport, &QAction::triggered, this, &MainWindow::onActionLogExport);
     connect(ui->actionDataReplay, &QAction::triggered, this, &MainWindow::onActionDataReplay);
     connect(ui->actionFirmwareUpgrade, &QAction::triggered, this, &MainWindow::onActionFirmwareUpgrade);
     connect(ui->actionNetworkConfig, &QAction::triggered, this, &MainWindow::onActionNetworkConfig);
@@ -858,29 +854,9 @@ void MainWindow::onActionExit()
     close();
 }
 
-void MainWindow::onActionViewAntenna()
+void MainWindow::onActionPatternSimulation()
 {
-    ui->telemetryTabWidget->setCurrentIndex(0);
-}
-
-void MainWindow::onActionViewTemperature()
-{
-    ui->telemetryTabWidget->setCurrentIndex(1);
-}
-
-void MainWindow::onActionViewPower()
-{
-    ui->telemetryTabWidget->setCurrentIndex(2);
-}
-
-void MainWindow::onActionViewElectronic()
-{
-    ui->telemetryTabWidget->setCurrentIndex(3);
-}
-
-void MainWindow::onActionLogExport()
-{
-    appendLog("[菜单] 日志导出功能暂未实现");
+    appendLog("[菜单] 方向图仿真功能暂未实现");
 }
 
 void MainWindow::onActionDataReplay()
@@ -908,6 +884,6 @@ void MainWindow::onActionAbout()
     QMessageBox::about(this, "关于",
         "<h2>相控阵天线地面测试系统</h2>"
         "<p>版本：v1.0.0</p>"
-        "<p>版权所有 © 2025 齐鲁空天信息研究院</p>"
+        "<p>版权所有 © 2026 齐鲁空天信息研究院</p>"
         "<p>保留所有权利</p>");
 }

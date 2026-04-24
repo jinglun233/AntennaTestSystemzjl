@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1490</width>
-    <height>920</height>
+    <height>915</height>
    </rect>
   </property>
   <property name="font">
@@ -20,6 +20,18 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="leftMargin">
+     <number>4</number>
+    </property>
+    <property name="topMargin">
+     <number>4</number>
+    </property>
+    <property name="rightMargin">
+     <number>4</number>
+    </property>
+    <property name="bottomMargin">
+     <number>4</number>
+    </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -584,11 +596,14 @@
        <string>设备信息</string>
       </property>
       <layout class="QVBoxLayout" name="telemetryLayout">
+       <property name="spacing">
+        <number>2</number>
+       </property>
        <property name="leftMargin">
         <number>4</number>
        </property>
        <property name="topMargin">
-        <number>4</number>
+        <number>2</number>
        </property>
        <property name="rightMargin">
         <number>4</number>
@@ -622,29 +637,15 @@
     <property name="title">
      <string>系统(&amp;S)</string>
     </property>
-    <addaction name="actionAutoTestWindow"/>
-    <addaction name="separator"/>
-    <addaction name="actionInstrumentControlWindow"/>
-    <addaction name="separator"/>
     <addaction name="actionExit"/>
-   </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>视图(&amp;V)</string>
-    </property>
-    <addaction name="actionViewAntenna"/>
-    <addaction name="separator"/>
-    <addaction name="actionViewTemperature"/>
-    <addaction name="separator"/>
-    <addaction name="actionViewPower"/>
-    <addaction name="separator"/>
-    <addaction name="actionViewElectronic"/>
    </widget>
    <widget class="QMenu" name="menuTool">
     <property name="title">
      <string>工具(&amp;T)</string>
     </property>
-    <addaction name="actionLogExport"/>
+    <addaction name="actionAutoTestWindow"/>
+    <addaction name="separator"/>
+    <addaction name="actionPatternSimulation"/>
     <addaction name="separator"/>
     <addaction name="actionDataReplay"/>
     <addaction name="separator"/>
@@ -665,7 +666,6 @@
     <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuSystem"/>
-   <addaction name="menuView"/>
    <addaction name="menuTool"/>
    <addaction name="menuConfig"/>
    <addaction name="menuHelp"/>
@@ -682,39 +682,14 @@
     <string>自动测试窗口</string>
    </property>
   </action>
-  <action name="actionInstrumentControlWindow">
+  <action name="actionPatternSimulation">
    <property name="text">
-    <string>仪器控制窗口</string>
+    <string>方向图仿真</string>
    </property>
   </action>
   <action name="actionExit">
    <property name="text">
     <string>退出(&amp;X)</string>
-   </property>
-  </action>
-  <action name="actionViewAntenna">
-   <property name="text">
-    <string>天线设备界面</string>
-   </property>
-  </action>
-  <action name="actionViewTemperature">
-   <property name="text">
-    <string>天线温度界面</string>
-   </property>
-  </action>
-  <action name="actionViewPower">
-   <property name="text">
-    <string>电源电压界面</string>
-   </property>
-  </action>
-  <action name="actionViewElectronic">
-   <property name="text">
-    <string>电子设备界面</string>
-   </property>
-  </action>
-  <action name="actionLogExport">
-   <property name="text">
-    <string>日志导出</string>
    </property>
   </action>
   <action name="actionDataReplay">
