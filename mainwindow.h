@@ -81,9 +81,9 @@ private:
     ElectronicDeviceWindow *electronicTab;
     TemperatureInfoWindow *temperatureTab;
     PowerVoltageWindow *powerTab;
-    AutoTestWindow *m_autoTestWindow;
 
     // ========== 菜单子窗口 ==========
+    AutoTestWindow *m_autoTestWindow;
     InstrumentControlWindow *m_instrumentControlWindow;
 
 private slots:

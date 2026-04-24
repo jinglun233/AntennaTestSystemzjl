@@ -38,7 +38,6 @@ MainWindow::MainWindow(QWidget *parent)
     electronicTab = new ElectronicDeviceWindow();
     temperatureTab = new TemperatureInfoWindow();
     powerTab = new PowerVoltageWindow();
-    m_autoTestWindow = new AutoTestWindow();
 
     // 在 addTab 之前记录每个 widget 的 UI 设计器原始几何尺寸
     // （addTab 后布局会覆盖 widget 原始尺寸，导致分离时无法恢复）
@@ -46,13 +45,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->telemetryTabWidget->recordDesignSize(temperatureTab, temperatureTab->size());
     ui->telemetryTabWidget->recordDesignSize(powerTab, powerTab->size());
     ui->telemetryTabWidget->recordDesignSize(electronicTab, electronicTab->size());
-    ui->telemetryTabWidget->recordDesignSize(m_autoTestWindow, m_autoTestWindow->size());
 
     ui->telemetryTabWidget->addTab(m_antennaDeviceWindow, "天线设备界面");
     ui->telemetryTabWidget->addTab(temperatureTab, "天线温度界面");
     ui->telemetryTabWidget->addTab(powerTab, "电源电压界面");
     ui->telemetryTabWidget->addTab(electronicTab, "电子设备界面");
-    ui->telemetryTabWidget->addTab(m_autoTestWindow, "自动测试界面");
 
     ui->telemetryTabWidget->replaceTabBar();
 
@@ -843,7 +840,12 @@ QString MainWindow::commandName(quint8 cmd)
 
 void MainWindow::onActionAutoTestWindow()
 {
-    ui->telemetryTabWidget->setCurrentIndex(4);
+    if (!m_autoTestWindow) {
+        m_autoTestWindow = new AutoTestWindow(this);
+    }
+    m_autoTestWindow->show();
+    m_autoTestWindow->raise();
+    m_autoTestWindow->activateWindow();
 }
 
 void MainWindow::onActionInstrumentControlWindow()
