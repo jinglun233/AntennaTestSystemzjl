@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1490</width>
-    <height>912</height>
+    <height>920</height>
    </rect>
   </property>
   <property name="font">
@@ -610,7 +610,7 @@
      <x>0</x>
      <y>0</y>
      <width>1490</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="font">
@@ -623,6 +623,7 @@
      <string>系统(&amp;S)</string>
     </property>
     <addaction name="actionAutoTestWindow"/>
+    <addaction name="separator"/>
     <addaction name="actionInstrumentControlWindow"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -632,8 +633,11 @@
      <string>视图(&amp;V)</string>
     </property>
     <addaction name="actionViewAntenna"/>
+    <addaction name="separator"/>
     <addaction name="actionViewTemperature"/>
+    <addaction name="separator"/>
     <addaction name="actionViewPower"/>
+    <addaction name="separator"/>
     <addaction name="actionViewElectronic"/>
    </widget>
    <widget class="QMenu" name="menuTool">
@@ -641,7 +645,9 @@
      <string>工具(&amp;T)</string>
     </property>
     <addaction name="actionLogExport"/>
+    <addaction name="separator"/>
     <addaction name="actionDataReplay"/>
+    <addaction name="separator"/>
     <addaction name="actionFirmwareUpgrade"/>
    </widget>
    <widget class="QMenu" name="menuConfig">
@@ -649,6 +655,7 @@
      <string>配置(&amp;C)</string>
     </property>
     <addaction name="actionNetworkConfig"/>
+    <addaction name="separator"/>
     <addaction name="actionDataPathConfig"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -662,6 +669,13 @@
    <addaction name="menuTool"/>
    <addaction name="menuConfig"/>
    <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
   </widget>
   <action name="actionAutoTestWindow">
    <property name="text">
@@ -728,13 +742,6 @@
     <string>关于(&amp;A)</string>
    </property>
   </action>
-  <widget class="QStatusBar" name="statusbar">
-   <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-  </widget>
  </widget>
  <customwidgets>
   <customwidget>
