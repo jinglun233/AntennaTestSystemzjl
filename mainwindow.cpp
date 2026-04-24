@@ -98,10 +98,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(temperatureTab,       &TemperatureInfoWindow::sendRawCommandToServer,
             this,                 &MainWindow::onSendRawCommand);
 
-    // ========== 菜单栏样式：去掉图标预留空间 ==========
+    // ========== 菜单栏样式：去掉下拉菜单图标预留空间 ==========
     ui->menubar->setStyleSheet(
-        "QMenuBar { padding-left: 0px; spacing: 0px; }"
-        "QMenuBar::item { padding: 2px 12px; }"
+        "QMenu::icon { width: 0px; }"
+        "QMenu::item { padding: 4px 16px; }"
     );
 
     // ========== 菜单栏信号槽连接 ==========
