@@ -5,12 +5,10 @@
 #include <QDateTime>
 
 AutoTestWindow::AutoTestWindow(QWidget *parent)
-    : QDialog(parent)
+    : QWidget(parent, Qt::Window)
     , ui(new Ui::AutoTestWindow)
     , m_connected(false)
 {
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setWindowTitle("自动测试窗口");
     ui->setupUi(this);
 }
 

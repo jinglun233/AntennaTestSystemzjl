@@ -1,13 +1,13 @@
 #ifndef AUTOTESTWINDOW_H
 #define AUTOTESTWINDOW_H
 
-#include <QDialog>
+#include <QWidget>
 
 namespace Ui {
 class AutoTestWindow;
 }
 
-class AutoTestWindow : public QDialog
+class AutoTestWindow : public QWidget
 {
     Q_OBJECT
 

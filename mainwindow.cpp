@@ -838,7 +838,9 @@ void MainWindow::onActionAutoTestWindow()
     if (!m_autoTestWindow) {
         m_autoTestWindow = new AutoTestWindow(this);
     }
-    m_autoTestWindow->exec();
+    m_autoTestWindow->show();
+    m_autoTestWindow->raise();
+    m_autoTestWindow->activateWindow();
 }
 
 void MainWindow::onActionInstrumentControlWindow()
