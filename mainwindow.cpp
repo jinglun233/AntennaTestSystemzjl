@@ -95,11 +95,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(temperatureTab,       &TemperatureInfoWindow::sendRawCommandToServer,
             this,                 &MainWindow::onSendRawCommand);
 
-    // ========== 菜单栏样式：去掉下拉菜单图标预留空间 ==========
-    ui->menubar->setStyleSheet(
-        "QMenu::icon { width: 0px; }"
-        "QMenu::item { padding: 4px 16px; }"
-    );
 
     // ========== 菜单栏信号槽连接 ==========
     connect(ui->actionAutoTestWindow, &QAction::triggered, this, &MainWindow::onActionAutoTestWindow);
@@ -843,9 +838,7 @@ void MainWindow::onActionAutoTestWindow()
     if (!m_autoTestWindow) {
         m_autoTestWindow = new AutoTestWindow(this);
     }
-    m_autoTestWindow->show();
-    m_autoTestWindow->raise();
-    m_autoTestWindow->activateWindow();
+    m_autoTestWindow->exec();
 }
 
 void MainWindow::onActionInstrumentControlWindow()
