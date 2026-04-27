@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1173</width>
-    <height>815</height>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,7 +42,7 @@
        <property name="maximumSize">
         <size>
          <width>180</width>
-         <height>260</height>
+         <height>240</height>
         </size>
        </property>
        <property name="font">
@@ -243,7 +243,7 @@
        <property name="maximumSize">
         <size>
          <width>230</width>
-         <height>260</height>
+         <height>240</height>
         </size>
        </property>
        <property name="font">
@@ -660,7 +660,7 @@
        <property name="maximumSize">
         <size>
          <width>100</width>
-         <height>260</height>
+         <height>240</height>
         </size>
        </property>
        <property name="font">
@@ -827,7 +827,7 @@
        <property name="maximumSize">
         <size>
          <width>220</width>
-         <height>260</height>
+         <height>240</height>
         </size>
        </property>
        <property name="font">
@@ -1214,7 +1214,7 @@
        <property name="maximumSize">
         <size>
          <width>250</width>
-         <height>260</height>
+         <height>240</height>
         </size>
        </property>
        <property name="font">

@@ -4,5 +4,7 @@
     <file alias="file.svg">resources/file.svg</file>
     <file alias="modernstyle.qss">resources/modernstyle.qss</file>
     <file alias="appicon.ico">resources/appicon.ico</file>
+    <file alias="pic/greenLED.png">pic/greenLED.png</file>
+    <file alias="pic/redLED.png">pic/redLED.png</file>
 </qresource>
 </RCC>

@@ -6,119 +6,281 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
-    <height>640</height>
+    <width>640</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>自动测试窗口</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>12</number>
-   </property>
-   <property name="leftMargin">
-    <number>16</number>
-   </property>
-   <property name="topMargin">
-    <number>16</number>
-   </property>
-   <property name="rightMargin">
-    <number>16</number>
-   </property>
-   <property name="bottomMargin">
-    <number>16</number>
-   </property>
+  <layout class="QHBoxLayout" name="horizontalLayoutMain">
    <item>
-    <widget class="QGroupBox" name="networkGroupBox">
-     <property name="title">
-      <string>网络连接设置</string>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <property name="spacing">
-       <number>8</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="ipLabel">
-        <property name="text">
-         <string>网络地址：</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="ipLineEdit">
-        <property name="text">
-         <string>192.168.1.111</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="portLabel">
-        <property name="text">
-         <string>端口号：</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="portLineEdit">
-        <property name="text">
-         <string>9600</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QPushButton" name="connectButton">
-        <property name="text">
-         <string>连接</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="testGroupBox">
-     <property name="title">
-      <string>自动测试控制</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="spacing">
-       <number>12</number>
-      </property>
-      <item>
-       <widget class="QPushButton" name="selectWaveDirButton">
-        <property name="text">
-         <string>选择波位文件夹</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="startAutoTestButton">
-        <property name="text">
-         <string>开始自动测试</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="resultGroupBox">
-     <property name="title">
-      <string>测试结果</string>
-     </property>
-     <layout class="QVBoxLayout" name="resultLayout">
-      <item>
-       <widget class="QPlainTextEdit" name="resultPlainTextEdit">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="placeholderText">
-         <string>测试结果将在此显示...</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QWidget" name="autoTestTab">
+      <attribute name="title">
+       <string>自动测试</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QGroupBox" name="networkGroupBox">
+           <property name="title">
+            <string>矢网仪器IP设置</string>
+           </property>
+           <layout class="QGridLayout" name="networkGridLayout">
+            <property name="spacing">
+             <number>8</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="ipLabel">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>地址：</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="ipLineEdit">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>192.168.1.111</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <widget class="QPushButton" name="connectButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>连接</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="powerLayout">
+           <item>
+            <widget class="QPushButton" name="powerOnButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>天线加电</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="powerOffButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>天线断电</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="waveControlGroupBox">
+           <property name="title">
+            <string>波控码</string>
+           </property>
+           <layout class="QVBoxLayout" name="waveControlLayout">
+            <item>
+             <widget class="QLineEdit" name="waveCodeLineEdit">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="placeholderText">
+               <string>波控文件路径</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="selectWaveDirButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>选择波位文件夹</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="configGroupBox">
+           <property name="title">
+            <string>配置文件</string>
+           </property>
+           <layout class="QVBoxLayout" name="configLayout">
+            <item>
+             <widget class="QPushButton" name="selectConfigFileButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>选择配置文件</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="configTableWidget"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QPushButton" name="startAutoTestButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>开始自动测试</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="statusIconLabel">
+             <property name="minimumSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="scaledContents">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="statusTextLabel">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>未连接</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="resultGroupBox">
+         <property name="title">
+          <string>测试结果</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QPlainTextEdit" name="resultPlainTextEdit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="placeholderText">
+             <string>测试结果将在此显示...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="instrumentControlTab">
+      <attribute name="title">
+       <string>仪器控制</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="instrumentControlLayout">
+       <item>
+        <widget class="QLabel" name="instrumentPlaceholderLabel">
+         <property name="text">
+          <string>仪器控制页面（待实现）</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>

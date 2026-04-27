@@ -26,6 +26,10 @@ signals:
     void antennaControlCommand(double targetAngle, double rotationSpeed, int controlMode, double accuracy);
     void sendRawCommandToServer(const QByteArray &command);  // 向服务端发送原始控制指令
 
+public:
+    void antennaPowerOn();   // 天线加电（供外部调用）
+    void antennaPowerOff();  // 天线断电（供外部调用）
+
 private slots:
     void on_antennaPowerOnButton_clicked();
     void on_antennaPowerOffButton_clicked();

@@ -26,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_maxClients = 0;
     m_clientSocket = nullptr;
     m_clientConnected = false;
+    m_vnaSocket = nullptr;
+    m_vnaConnected = false;
     m_autoTestWindow = nullptr;
     m_instrumentControlWindow = nullptr;
 
@@ -98,7 +100,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // ========== 菜单栏信号槽连接 ==========
     connect(ui->actionAutoTestWindow, &QAction::triggered, this, &MainWindow::onActionAutoTestWindow);
-    connect(ui->actionInstrumentControlWindow, &QAction::triggered, this, &MainWindow::onActionInstrumentControlWindow);
     connect(ui->actionPatternSimulation, &QAction::triggered, this, &MainWindow::onActionPatternSimulation);
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::onActionExit);
     connect(ui->actionDataReplay, &QAction::triggered, this, &MainWindow::onActionDataReplay);
@@ -139,6 +140,13 @@ MainWindow::~MainWindow()
         disconnect(m_clientSocket, nullptr, this, nullptr);
         m_clientSocket->abort();
         m_clientSocket->deleteLater();
+    }
+
+    // 安全关闭矢网仪器 socket
+    if (m_vnaSocket) {
+        disconnect(m_vnaSocket, nullptr, this, nullptr);
+        m_vnaSocket->abort();
+        m_vnaSocket->deleteLater();
     }
 
     delete m_tcpServer;
@@ -445,6 +453,39 @@ void MainWindow::onClientSocketDisconnected()
 
     updateUIState();
     appendLog(QString("[断开] 与服务器的连接已断开：%1").arg(info));
+}
+
+// ============================================================================
+//                     矢网仪器 TCP 连接
+// ============================================================================
+
+void MainWindow::onVnaSocketReadyRead()
+{
+    if (!m_vnaSocket) return;
+
+    QByteArray data = m_vnaSocket->readAll();
+    if (data.isEmpty()) return;
+
+    // TODO: 处理矢网仪器返回数据
+    appendLog(QString("[矢网←] %1 字节").arg(data.size()));
+}
+
+void MainWindow::onVnaSocketDisconnected()
+{
+    if (!m_vnaSocket) return;
+
+    QString info = QString("%1:%2")
+                   .arg(m_vnaSocket->peerAddress().toString())
+                   .arg(m_vnaSocket->peerPort());
+
+    m_vnaConnected = false;
+
+    // 通知 AutoTestWindow 连接已断开
+    if (m_autoTestWindow) {
+        m_autoTestWindow->onDisconnected();
+    }
+
+    appendLog(QString("[矢网] 连接已断开：%1").arg(info));
 }
 
 // ============================================================================
@@ -833,6 +874,43 @@ void MainWindow::onActionAutoTestWindow()
 {
     if (!m_autoTestWindow) {
         m_autoTestWindow = new AutoTestWindow(this);
+
+        // 天线加电/断电请求转发
+        connect(m_autoTestWindow, &AutoTestWindow::antennaPowerOnRequested,
+                m_antennaDeviceWindow, &AntennaDeviceWindow::antennaPowerOn);
+        connect(m_autoTestWindow, &AutoTestWindow::antennaPowerOffRequested,
+                m_antennaDeviceWindow, &AntennaDeviceWindow::antennaPowerOff);
+
+        // 矢网仪器连接/断开请求转发（独立 socket，与主页面客户端模式无关）
+        connect(m_autoTestWindow, &AutoTestWindow::connectToHostRequested,
+                this, [this](const QString &ip, quint16 port) {
+            if (!m_vnaSocket) {
+                m_vnaSocket = new QTcpSocket(this);
+                connect(m_vnaSocket, &QTcpSocket::readyRead,
+                        this, &MainWindow::onVnaSocketReadyRead);
+                connect(m_vnaSocket, &QTcpSocket::disconnected,
+                        this, &MainWindow::onVnaSocketDisconnected);
+            }
+
+            m_vnaSocket->connectToHost(QHostAddress(ip), port);
+            if (m_vnaSocket->waitForConnected(3000)) {
+                m_vnaConnected = true;
+                m_autoTestWindow->onConnected();
+                appendLog(QString("[矢网] 已连接到 %1:%2").arg(ip).arg(port));
+            } else {
+                QMessageBox::critical(this, "错误",
+                    QString("无法连接到矢网仪器！\n%1").arg(m_vnaSocket->errorString()));
+                appendLog(QString("[ERROR] 矢网连接失败：%1").arg(m_vnaSocket->errorString()));
+            }
+        });
+
+        connect(m_autoTestWindow, &AutoTestWindow::disconnectFromHostRequested,
+                this, [this]() {
+            if (m_vnaConnected && m_vnaSocket) {
+                m_vnaSocket->disconnectFromHost();
+                // 断开后的 UI 更新和日志由 onVnaSocketDisconnected() 统一处理
+            }
+        });
     }
     m_autoTestWindow->show();
     m_autoTestWindow->raise();

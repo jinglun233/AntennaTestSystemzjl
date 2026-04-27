@@ -359,10 +359,21 @@ void AntennaDeviceWindow::on_testParamDownloadButton_clicked()
     QMessageBox::information(this, "完成", "测试参数已下发。");
 }
 
-void AntennaDeviceWindow::on_antennaPowerOnButton_clicked()
+void AntennaDeviceWindow::antennaPowerOn()
 {
     QByteArray command = QByteArray::fromRawData("\xEB\x90\x01\xA1\x05", 5);
     emit sendRawCommandToServer(command);
+}
+
+void AntennaDeviceWindow::antennaPowerOff()
+{
+    QByteArray command = QByteArray::fromRawData("\xEB\x90\x01\xA0\x05", 5);
+    emit sendRawCommandToServer(command);
+}
+
+void AntennaDeviceWindow::on_antennaPowerOnButton_clicked()
+{
+    antennaPowerOn();
 }
 
 void AntennaDeviceWindow::resizeEvent(QResizeEvent *event)
@@ -372,8 +383,7 @@ void AntennaDeviceWindow::resizeEvent(QResizeEvent *event)
 
 void AntennaDeviceWindow::on_antennaPowerOffButton_clicked()
 {
-    QByteArray command = QByteArray::fromRawData("\xEB\x90\x01\xA0\x05", 5);
-    emit sendRawCommandToServer(command);
+    antennaPowerOff();
 }
 
 void AntennaDeviceWindow::on_thermalPowerOnButton_clicked()

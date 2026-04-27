@@ -68,6 +68,10 @@ private:
     QTcpSocket *m_clientSocket;   // 客户端模式下的主动连接 socket
     bool m_clientConnected;       // 客户端连接状态
 
+    // ========== 矢网仪器 TCP 连接（独立） ==========
+    QTcpSocket *m_vnaSocket;      // 矢网仪器连接 socket
+    bool m_vnaConnected;          // 矢网连接状态
+
     // ========== 数据收发相关 ==========
     /**
      * @brief 每个客户端对应一个环形缓冲区
@@ -104,6 +108,10 @@ private slots:
     void onDisconnectClientClicked();
     void onClientSocketReadyRead();
     void onClientSocketDisconnected();
+
+    // ========== 矢网仪器连接槽函数 ==========
+    void onVnaSocketReadyRead();
+    void onVnaSocketDisconnected();
 
     // ========== 菜单栏槽函数 ==========
     void onActionAutoTestWindow();
