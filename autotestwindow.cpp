@@ -336,9 +336,10 @@ void AutoTestWindow::scheduleNextStep(TestStep nextStep, int delayMs)
 // ============================================================================
 
 /**
- * @brief 步骤1：从 configTableWidget 第二列读取所有通道名称
+ * @brief 步骤1：从 configTableWidget 第一列读取所有波控码文件名
  *
- * 配置表第二列格式示例："CS01HR\模块1组件1通道1"
+ * 配置表第一列格式示例："CS01HR\模块1组件1通道1"
+ * 波控码文件路径 = waveCodeLineEdit路径 / 第一列文本
  */
 void AutoTestWindow::doReadConfig()
 {
@@ -351,16 +352,16 @@ void AutoTestWindow::doReadConfig()
         return;
     }
 
-    // 读取第二列（索引=1）的每个单元格
+    // 读取第一列（索引=0）的每个单元格作为波控码文件名
     for (int row = 0; row < rowCount; ++row) {
-        QTableWidgetItem *item = ui->configTableWidget->item(row, 1);
+        QTableWidgetItem *item = ui->configTableWidget->item(row, 0);
         if (item && !item->text().trimmed().isEmpty()) {
             m_channelList.append(item->text().trimmed());
         }
     }
 
     if (m_channelList.isEmpty()) {
-        appendResult("[错误] 配置表第二列为空！");
+        appendResult("[错误] 配置表第一列为空！");
         stopAutoTestFlow();
         return;
     }
