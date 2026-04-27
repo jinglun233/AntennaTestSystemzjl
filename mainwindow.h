@@ -20,7 +20,6 @@
 #include "temperatureinfowindow.h"
 #include "powervoltagewindow.h"
 #include "autotestwindow.h"
-#include "instrumentcontrolwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -88,7 +87,6 @@ private:
 
     // ========== 菜单弹窗子窗口（有 parent = this） ==========
     AutoTestWindow        *m_autoTestWindow;
-    InstrumentControlWindow *m_instrumentControlWindow;
 
 private slots:
     void updateDateTime();
@@ -122,7 +120,6 @@ private slots:
 
     // ========== 菜单栏槽函数 ==========
     void onActionAutoTestWindow();
-    void onActionInstrumentControlWindow();
     void onActionPatternSimulation();
     void onActionExit();
     void onActionDataReplay();

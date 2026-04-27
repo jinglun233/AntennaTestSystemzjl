@@ -21,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent)
     // ========== 成员初始化 ==========
     m_currentMode = WorkMode::None;
     m_autoTestWindow = nullptr;
-    m_instrumentControlWindow = nullptr;
 
     // ★★★ 核心变更：创建网络管理器（替代所有原始 QTcpSocket）★★★
     m_network = new NetworkManager(this);
@@ -763,16 +762,6 @@ void MainWindow::onActionAutoTestWindow()
     m_autoTestWindow->show();
     m_autoTestWindow->raise();
     m_autoTestWindow->activateWindow();
-}
-
-void MainWindow::onActionInstrumentControlWindow()
-{
-    if (!m_instrumentControlWindow) {
-        m_instrumentControlWindow = new InstrumentControlWindow(this);
-    }
-    m_instrumentControlWindow->show();
-    m_instrumentControlWindow->raise();
-    m_instrumentControlWindow->activateWindow();
 }
 
 void MainWindow::onActionExit()

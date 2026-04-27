@@ -13,11 +13,11 @@
   <property name="windowTitle">
    <string>自动测试窗口</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayoutMain">
-   <item>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="autoTestTab">
       <attribute name="title">
@@ -270,14 +270,221 @@
       </attribute>
       <layout class="QVBoxLayout" name="instrumentControlLayout">
        <item>
-        <widget class="QLabel" name="instrumentPlaceholderLabel">
-         <property name="text">
-          <string>仪器控制页面（待实现）</string>
+        <widget class="QGroupBox" name="connectionGroupBox">
+         <property name="title">
+          <string>仪器连接设置</string>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <property name="spacing">
+           <number>8</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="instrumentTypeLabel_2">
+            <property name="text">
+             <string>仪器类型：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="instrumentTypeComboBox_2">
+            <item>
+             <property name="text">
+              <string>频谱分析仪</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>信号发生器</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>功率计</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>网络分析仪</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>示波器</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="visaAddressLabel_2">
+            <property name="text">
+             <string>VISA地址：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="visaAddressLineEdit_2">
+            <property name="text">
+             <string>TCPIP0::192.168.1.100::inst0::INSTR</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <layout class="QHBoxLayout" name="buttonLayout_2">
+            <item>
+             <widget class="QPushButton" name="connectInstrumentButton_2">
+              <property name="text">
+               <string>连接仪器</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="disconnectInstrumentButton_2">
+              <property name="text">
+               <string>断开仪器</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="paramGroupBox">
+         <property name="title">
+          <string>参数控制</string>
+         </property>
+         <layout class="QGridLayout" name="paramGridLayout_2">
+          <property name="spacing">
+           <number>8</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="centerFreqLabel_2">
+            <property name="text">
+             <string>中心频率 (GHz)：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="centerFreqLineEdit_2">
+            <property name="text">
+             <string>5.6</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="spanLabel_2">
+            <property name="text">
+             <string>扫宽 (MHz)：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="spanLineEdit_2">
+            <property name="text">
+             <string>100</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="powerLabel_2">
+            <property name="text">
+             <string>参考功率 (dBm)：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="powerLineEdit_2">
+            <property name="text">
+             <string>-10</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <layout class="QHBoxLayout" name="controlButtonLayout_2">
+            <item>
+             <widget class="QPushButton" name="initInstrumentButton_2">
+              <property name="text">
+               <string>初始化</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="readParamButton_2">
+              <property name="text">
+               <string>读取参数</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="setParamButton_2">
+              <property name="text">
+               <string>设置参数</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="controlSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="statusGroupBox">
+         <property name="title">
+          <string>仪器状态</string>
+         </property>
+         <layout class="QVBoxLayout" name="statusLayout_2">
+          <item>
+           <widget class="QPlainTextEdit" name="statusPlainTextEdit_2">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="placeholderText">
+             <string>仪器状态与操作日志将在此显示...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="instrumentVerticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

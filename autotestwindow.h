@@ -63,7 +63,7 @@ public slots:
     void onWaveCodeDownloadCompleted(bool ok, int totalPages);  // 波控码下发完成回调
 
 private slots:
-    // UI 控件槽函数
+    // UI 控件槽函数（自动测试 Tab）
     void on_connectButton_clicked();
     void on_powerOnButton_clicked();
     void on_powerOffButton_clicked();
@@ -71,12 +71,20 @@ private slots:
     void on_selectConfigFileButton_clicked();
     void on_startAutoTestButton_clicked();
 
+    // UI 控件槽函数（仪器控制 Tab）
+    void on_connectInstrumentButton_2_clicked();
+    void on_disconnectInstrumentButton_2_clicked();
+    void on_initInstrumentButton_2_clicked();
+    void on_readParamButton_2_clicked();
+    void on_setParamButton_2_clicked();
+
     // ★★★ 测试流程状态机驱动 ★★★
     void onTestStepTimer();          // 定时器回调：执行下一步
 
 private:
     // ========== UI 辅助 ==========
     void appendResult(const QString &text);
+    void appendInstrumentLog(const QString &text);  // 仪器控制Tab日志
     void updateTestStatus(bool running);
     void loadConfigCsv(const QString &filePath);
     bool canStartTest() const;
@@ -128,6 +136,9 @@ private:
     bool m_powerOn;                       // 天线是否已加电
     bool m_testing;                       // 是否正在测试中
     QString m_vnaFilePath;                // 矢网文件保存路径（待UI控件绑定）
+
+    // ========== 仪器控制 Tab ==========
+    bool m_instrumentConnected;           // 通用仪器连接状态
 };
 
 #endif // AUTOTESTWINDOW_H
