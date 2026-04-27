@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "antennadevicewindow.h"
 #include <QTime>
 #include <QDateTime>
 #include <QMessageBox>
@@ -21,28 +20,53 @@ MainWindow::MainWindow(QWidget *parent)
 
     // ========== 成员初始化 ==========
     m_currentMode = WorkMode::None;
-    m_serverRunning = false;
-    m_tcpServer = nullptr;
-    m_maxClients = 0;
-    m_clientSocket = nullptr;
-    m_clientConnected = false;
-    m_vnaSocket = nullptr;
-    m_vnaConnected = false;
     m_autoTestWindow = nullptr;
     m_instrumentControlWindow = nullptr;
+
+    // ★★★ 核心变更：创建网络管理器（替代所有原始 QTcpSocket）★★★
+    m_network = new NetworkManager(this);
+
+    // 连接 NetworkManager 信号到 MainWindow 槽函数
+    // --- 服务器事件 ---
+    connect(m_network, &NetworkManager::logMessage,
+            this, &MainWindow::onNetworkLog);
+    connect(m_network, &NetworkManager::errorOccurred,
+            this, &MainWindow::onNetworkError);
+
+    connect(m_network, &NetworkManager::serverClientConnected,
+            this, &MainWindow::onServerClientConnected);
+    connect(m_network, &NetworkManager::serverClientDisconnected,
+            this, &MainWindow::onServerClientDisconnected);
+    connect(m_network, &NetworkManager::serverDataReceived,
+            this, &MainWindow::onServerDataReceived);
+
+    // --- 主界面客户端事件 ---
+    connect(m_network, &NetworkManager::clientConnected,
+            this, &MainWindow::onMainClientConnected);
+    connect(m_network, &NetworkManager::clientDisconnected,
+            this, &MainWindow::onMainClientDisconnected);
+    connect(m_network, &NetworkManager::clientDataReceived,
+            this, &MainWindow::onMainClientDataReceived);
+
+    // --- 矢网事件（由 MainWindow 转发到 AutoTestWindow）---
+    connect(m_network, &NetworkManager::vnaConnected,
+            this, &MainWindow::onVnaConnected);
+    connect(m_network, &NetworkManager::vnaDisconnected,
+            this, &MainWindow::onVnaDisconnected);
+    connect(m_network, &NetworkManager::vnaDataReceived,
+            this, &MainWindow::onVnaDataReceived);
 
     // ========== 周期性指令定时器初始化（1秒周期，不自动启动） ==========
     m_periodicCommandTimer = new QTimer(this);
     connect(m_periodicCommandTimer, &QTimer::timeout, this, &MainWindow::onPeriodicCommandTimer);
 
-    // ========== 创建设备子窗口 ==========
-    m_antennaDeviceWindow = new AntennaDeviceWindow();
-    electronicTab = new ElectronicDeviceWindow();
-    temperatureTab = new TemperatureInfoWindow();
-    powerTab = new PowerVoltageWindow();
+    // ========== 创建设备子窗口（添加 parent，修复内存泄漏） ==========
+    m_antennaDeviceWindow = new AntennaDeviceWindow(this);
+    electronicTab = new ElectronicDeviceWindow(this);
+    temperatureTab = new TemperatureInfoWindow(this);
+    powerTab = new PowerVoltageWindow(this);
 
     // 在 addTab 之前记录每个 widget 的 UI 设计器原始几何尺寸
-    // （addTab 后布局会覆盖 widget 原始尺寸，导致分离时无法恢复）
     ui->telemetryTabWidget->recordDesignSize(m_antennaDeviceWindow, m_antennaDeviceWindow->size());
     ui->telemetryTabWidget->recordDesignSize(temperatureTab, temperatureTab->size());
     ui->telemetryTabWidget->recordDesignSize(powerTab, powerTab->size());
@@ -54,7 +78,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->telemetryTabWidget->addTab(electronicTab, "电子设备界面");
 
     ui->telemetryTabWidget->replaceTabBar();
-
 
     // ========== 状态栏三段布局 ==========
     m_modeStatusLabel = new QLabel(this);
@@ -88,15 +111,38 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->stopServerButton, &QPushButton::clicked, this, &MainWindow::onStopServerClicked);
 
     // 客户端设置按钮信号槽
-    connect(ui->connectClientButton, &QPushButton::clicked, this, &MainWindow::onConnectClientClicked);
-    connect(ui->disconnectClientButton, &QPushButton::clicked, this, &MainWindow::onDisconnectClientClicked);
+    connect(ui->connectClientButton, &QPushButton::clicked, [this]() {
+        QString ip = ui->clientIpLineEdit->text().trimmed();
+        quint16 port = static_cast<quint16>(ui->clientPortSpinBox->value());
+
+        if (ip.isEmpty()) {
+            QMessageBox::warning(this, "错误", "请输入服务器 IP 地址！");
+            return;
+        }
+        QHostAddress addr(ip);
+        if (addr.isNull()) {
+            QMessageBox::warning(this, "错误", "IP 地址格式无效！");
+            return;
+        }
+
+        if (!m_network->connectToServer(ip, port)) {
+            QMessageBox::critical(this, "错误", QString("无法连接到服务器！\n%1")
+                                  .arg("请检查网络设置"));
+        }
+    });
+
+    connect(ui->disconnectClientButton, &QPushButton::clicked, [this]() {
+        m_network->disconnectFromServer();
+        if (m_periodicCommandTimer->isActive()) {
+            m_periodicCommandTimer->stop();
+        }
+    });
 
     // ========== 子窗口信号槽连接 ==========
     connect(m_antennaDeviceWindow, &AntennaDeviceWindow::sendRawCommandToServer,
             this,      &MainWindow::onSendRawCommand);
     connect(temperatureTab,       &TemperatureInfoWindow::sendRawCommandToServer,
             this,                 &MainWindow::onSendRawCommand);
-
 
     // ========== 菜单栏信号槽连接 ==========
     connect(ui->actionAutoTestWindow, &QAction::triggered, this, &MainWindow::onActionAutoTestWindow);
@@ -113,7 +159,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    // 停止所有定时器，防止析构期间触发槽函数
+    // 停止定时器
     if (m_periodicCommandTimer) {
         m_periodicCommandTimer->stop();
     }
@@ -121,35 +167,7 @@ MainWindow::~MainWindow()
         m_dateTimeTimer->stop();
     }
 
-    // 关闭 TCP 服务器，停止接受新连接
-    if (m_tcpServer && m_tcpServer->isListening()) {
-        m_tcpServer->close();
-    }
-
-    // 安全关闭所有服务端客户端
-    for (QTcpSocket *sock : m_clients) {
-        disconnect(sock, nullptr, this, nullptr);
-        sock->abort();
-    }
-    qDeleteAll(m_clients);
-    m_clients.clear();
-    m_clientBuffers.clear();
-
-    // 安全关闭客户端 socket
-    if (m_clientSocket) {
-        disconnect(m_clientSocket, nullptr, this, nullptr);
-        m_clientSocket->abort();
-        m_clientSocket->deleteLater();
-    }
-
-    // 安全关闭矢网仪器 socket
-    if (m_vnaSocket) {
-        disconnect(m_vnaSocket, nullptr, this, nullptr);
-        m_vnaSocket->abort();
-        m_vnaSocket->deleteLater();
-    }
-
-    delete m_tcpServer;
+    // NetworkManager 的析构会自动清理所有 socket（因为它有 parent = this）
     delete ui;
 }
 
@@ -161,9 +179,12 @@ void MainWindow::updateUIState()
 {
     bool modeSelected = (m_currentMode != WorkMode::None);
 
-    ui->modeComboBox->setEnabled(!m_serverRunning && !m_clientConnected);
-    ui->confirmModeButton->setEnabled(!modeSelected && !m_serverRunning && !m_clientConnected);
-    ui->cancelModeButton->setEnabled(modeSelected && !m_serverRunning && !m_clientConnected);
+    bool serverRunning = m_network->isServerRunning();
+    bool clientConnected = m_network->isClientConnected();
+
+    ui->modeComboBox->setEnabled(!serverRunning && !clientConnected);
+    ui->confirmModeButton->setEnabled(!modeSelected && !serverRunning && !clientConnected);
+    ui->cancelModeButton->setEnabled(modeSelected && !serverRunning && !clientConnected);
 
     // 根据模式控制服务器/客户端设置 GroupBox 的可见性
     switch (m_currentMode) {
@@ -172,30 +193,28 @@ void MainWindow::updateUIState()
         ui->clientGroupBox->setVisible(false);
         break;
     case WorkMode::AntennaGroundTest:
-        // 模式0：只显示客户端设置（作为客户端连接外部服务器）
         ui->serverGroupBox->setVisible(false);
         ui->clientGroupBox->setVisible(true);
         break;
     case WorkMode::SimulateDevice:
-        // 模式1：同时显示服务器设置和客户端设置
         ui->serverGroupBox->setVisible(true);
         ui->clientGroupBox->setVisible(true);
         break;
     }
 
     // 服务器控件状态
-    bool serverControlsEnabled = modeSelected && !m_serverRunning;
+    bool serverControlsEnabled = modeSelected && !serverRunning;
     ui->ipLineEdit->setEnabled(serverControlsEnabled);
     ui->portSpinBox->setEnabled(serverControlsEnabled);
-    ui->startServerButton->setEnabled(modeSelected && !m_serverRunning);
-    ui->stopServerButton->setEnabled(m_serverRunning);
+    ui->startServerButton->setEnabled(modeSelected && !serverRunning);
+    ui->stopServerButton->setEnabled(serverRunning);
 
     // 客户端控件状态
-    bool clientControlsEnabled = modeSelected && !m_clientConnected;
+    bool clientControlsEnabled = modeSelected && !clientConnected;
     ui->clientIpLineEdit->setEnabled(clientControlsEnabled);
     ui->clientPortSpinBox->setEnabled(clientControlsEnabled);
-    ui->connectClientButton->setEnabled(modeSelected && !m_clientConnected);
-    ui->disconnectClientButton->setEnabled(m_clientConnected);
+    ui->connectClientButton->setEnabled(modeSelected && !clientConnected);
+    ui->disconnectClientButton->setEnabled(clientConnected);
 
     updateModeStatusLabel();
 }
@@ -249,26 +268,24 @@ void MainWindow::onConfirmModeClicked()
         appendLog("工作模式：【模拟电子设备模式】（最多连接 2 个客户端）");
     }
 
-    m_maxClients = getMaxClientsForMode(m_currentMode);
     updateUIState();
 }
 
 void MainWindow::onCancelModeClicked()
 {
-    if (m_serverRunning) {
-        onStopServerClicked();
+    if (m_network->isServerRunning()) {
+        m_network->stopServer();
         appendLog("已自动停止服务器。");
     }
 
     m_currentMode = WorkMode::None;
-    m_maxClients = 0;
 
     appendLog("已取消工作模式。");
     updateUIState();
 }
 
 // ============================================================================
-//                         TCP 服务器管理
+//                         TCP 服务器管理（委托给 NetworkManager）
 // ============================================================================
 
 void MainWindow::onStartServerClicked()
@@ -287,124 +304,70 @@ void MainWindow::onStartServerClicked()
         return;
     }
 
-    if (!m_tcpServer) {
-        m_tcpServer = new QTcpServer(this);
-        connect(m_tcpServer, &QTcpServer::newConnection, this, &MainWindow::onNewConnection);
-    }
-
-    if (!m_tcpServer->listen(addr, port)) {
+    int maxClients = getMaxClientsForMode(m_currentMode);
+    if (!m_network->startServer(ip, port, maxClients)) {
         QMessageBox::critical(this, "错误",
                               QString("无法启动服务！\n%1\n请检查端口是否被占用。")
-                              .arg(m_tcpServer->errorString()));
-        appendLog(QString("[ERROR] 服务启动失败：%1").arg(m_tcpServer->errorString()));
+                              .arg("请检查网络设置"));
         return;
     }
 
-    m_serverRunning = true;
-    updateUIState();
-
-    // 保存目标客户端IP（即监听IP，用于周期性指令定向发送）
+    // 保存目标客户端IP（用于周期性指令定向发送）
     m_targetClientIP = "127.0.0.1";
 
-    appendLog(QString("[成功] 服务已启动，监听 %1:%2").arg(ip).arg(port));
-    appendLog(QString("--- 等待客户端连接 ---").arg(m_maxClients));
+    onServerStarted();
+    updateUIState();
 }
 
 void MainWindow::onStopServerClicked()
 {
-    if (!m_serverRunning) return;
-
-    for (QTcpSocket *sock : m_clients) {
-        sock->disconnectFromHost();
-    }
-    m_clients.clear();
-    m_clientBuffers.clear();   // 清空所有环形缓冲区
-
-    if (m_tcpServer && m_tcpServer->isListening()) {
-        m_tcpServer->close();
-    }
-
-    m_serverRunning = false;
+    m_network->stopServer();
     m_targetClientIP.clear();
+    onServerStopped();
     updateUIState();
+}
+
+// ============================================================================
+//                     NetworkManager 事件转发 — 服务器
+// ============================================================================
+
+void MainWindow::onServerStarted()
+{
+    QString ip = ui->ipLineEdit->text().trimmed();
+    quint16 port = static_cast<quint16>(ui->portSpinBox->value());
+    appendLog(QString("[成功] 服务已启动，监听 %1:%2").arg(ip).arg(port));
+    appendLog(QString("--- 等待客户端连接 ---").arg(getMaxClientsForMode(m_currentMode)));
+}
+
+void MainWindow::onServerStopped()
+{
+    // 清理环形缓冲区
+    m_clientBuffers.clear();
     appendLog("--- 已手动停止服务器 ---");
 }
 
-// ============================================================================
-//                         TCP 客户端连接/断开（客户端模式）
-// ============================================================================
-
-void MainWindow::onConnectClientClicked()
+void MainWindow::onServerClientConnected(const ConnectionHandle &h)
 {
-    QString ip = ui->clientIpLineEdit->text().trimmed();
-    quint16 port = static_cast<quint16>(ui->clientPortSpinBox->value());
-
-    if (ip.isEmpty()) {
-        QMessageBox::warning(this, "错误", "请输入服务器 IP 地址！");
-        return;
-    }
-
-    QHostAddress addr(ip);
-    if (addr.isNull()) {
-        QMessageBox::warning(this, "错误", "IP 地址格式无效！");
-        return;
-    }
-
-    if (!m_clientSocket) {
-        m_clientSocket = new QTcpSocket(this);
-        connect(m_clientSocket, &QTcpSocket::readyRead,
-                this, &MainWindow::onClientSocketReadyRead);
-        connect(m_clientSocket, &QTcpSocket::disconnected,
-                this, &MainWindow::onClientSocketDisconnected);
-    }
-
-    m_clientSocket->connectToHost(addr, port);
-    if (!m_clientSocket->waitForConnected(3000)) {
-        QMessageBox::critical(this, "错误",
-                              QString("无法连接到服务器！\n%1").arg(m_clientSocket->errorString()));
-        appendLog(QString("[ERROR] 客户端连接失败：%1").arg(m_clientSocket->errorString()));
-        return;
-    }
-
-    m_clientConnected = true;
-
-    // 为客户端 socket 创建环形缓冲区
-    auto buffer = std::make_shared<RingBuffer>(128 * 1024);
-    m_clientBuffers.insert(m_clientSocket, buffer);
-
-    // 启动周期性指令定时器（1秒间隔）—— 客户端模式下由客户端主动发送
-    if (!m_periodicCommandTimer->isActive()) {
-        m_periodicCommandTimer->start(1000);
-    }
-
-    updateUIState();
-    appendLog(QString("[成功] 已连接到服务器 %1:%2").arg(ip).arg(port));
+    // 为该客户端创建独立的环形缓冲区
+    m_clientBuffers[h.id] = std::make_shared<RingBuffer>(128 * 1024);
+    appendLog(QString("[连接] 客户端 #%1 已接入：%2（当前 %3/%4）")
+              .arg(h.id).arg(h.peerInfo).arg(h.id).arg(getMaxClientsForMode(m_currentMode)));
 }
 
-void MainWindow::onDisconnectClientClicked()
+void MainWindow::onServerClientDisconnected(const ConnectionHandle &h)
 {
-    if (!m_clientConnected || !m_clientSocket) return;
-
-    // 停止周期性指令定时器
-    if (m_periodicCommandTimer->isActive()) {
-        m_periodicCommandTimer->stop();
-    }
-
-    m_clientSocket->disconnectFromHost();
-    // 实际断开逻辑在 onClientSocketDisconnected 中处理
+    m_clientBuffers.remove(h.id);
+    appendLog(QString("[断开] 客户端 #%1 %2 已离开").arg(h.id).arg(h.peerInfo));
 }
 
-void MainWindow::onClientSocketReadyRead()
+void MainWindow::onServerDataReceived(const ConnectionHandle &h, const QByteArray &data)
 {
-    if (!m_clientSocket || !m_clientBuffers.contains(m_clientSocket)) return;
+    // 写入对应客户端的环形缓冲区
+    auto it = m_clientBuffers.find(h.id);
+    if (it == m_clientBuffers.end()) return;
 
-    // 与服务端接收逻辑统一：读取数据 → 写入环形缓冲 → 解析帧
-    QByteArray rawData = m_clientSocket->readAll();
-    if (rawData.isEmpty()) return;
-
-    auto &ringBuf = m_clientBuffers[m_clientSocket];
-    size_t written = ringBuf->write(rawData);
-    Q_UNUSED(written);
+    auto &ringBuf = it.value();
+    ringBuf->write(data);
 
     // 循环解析完整帧
     while (true) {
@@ -431,195 +394,115 @@ void MainWindow::onClientSocketReadyRead()
         }
 
         ringBuf->consume(static_cast<size_t>(consumed));
-        handleReceivedFrame(m_clientSocket, frame);
+        handleReceivedFrame(h.id, frame);
     }
 }
 
-void MainWindow::onClientSocketDisconnected()
+// ============================================================================
+//                   NetworkManager 事件转发 — 客户端模式
+// ============================================================================
+
+void MainWindow::onMainClientConnected()
 {
-    if (!m_clientSocket) return;
+    // 为客户端 socket 创建环形缓冲区
+    // （实际数据在 onMainClientDataReceived 中写入）
+    m_clientBuffers[0] = std::make_shared<RingBuffer>(128 * 1024);
 
-    QString info = QString("%1:%2")
-                   .arg(m_clientSocket->peerAddress().toString())
-                   .arg(m_clientSocket->peerPort());
+    // 启动周期性指令定时器（1秒间隔）—— 客户端模式下主动发送
+    if (!m_periodicCommandTimer->isActive()) {
+        m_periodicCommandTimer->start(1000);
+    }
 
+    ConnectionHandle h = m_network->clientHandle();
+    updateUIState();
+    appendLog(QString("[成功] 已连接到服务器 %1").arg(h.peerInfo));
+}
+
+void MainWindow::onMainClientDisconnected()
+{
     // 停止周期性指令定时器
     if (m_periodicCommandTimer->isActive()) {
         m_periodicCommandTimer->stop();
     }
 
-    m_clientBuffers.remove(m_clientSocket);
-    m_clientConnected = false;
-
+    m_clientBuffers.remove(0);
     updateUIState();
-    appendLog(QString("[断开] 与服务器的连接已断开：%1").arg(info));
+    ConnectionHandle h = m_network->clientHandle();
+    appendLog(QString("[断开] 与服务器的连接已断开：%1").arg(h.peerInfo));
 }
 
-// ============================================================================
-//                     矢网仪器 TCP 连接
-// ============================================================================
-
-void MainWindow::onVnaSocketReadyRead()
+void MainWindow::onMainClientDataReceived(const QByteArray &data)
 {
-    if (!m_vnaSocket) return;
+    // 写入客户端的环形缓冲区并尝试解析帧
+    auto it = m_clientBuffers.find(0);   // clientId=0 表示主界面客户端
+    if (it == m_clientBuffers.end()) return;
 
-    QByteArray data = m_vnaSocket->readAll();
-    if (data.isEmpty()) return;
+    auto &ringBuf = it.value();
+    ringBuf->write(data);
 
-    // TODO: 处理矢网仪器返回数据
-    appendLog(QString("[矢网←] %1 字节").arg(data.size()));
-}
-
-void MainWindow::onVnaSocketDisconnected()
-{
-    if (!m_vnaSocket) return;
-
-    QString info = QString("%1:%2")
-                   .arg(m_vnaSocket->peerAddress().toString())
-                   .arg(m_vnaSocket->peerPort());
-
-    m_vnaConnected = false;
-
-    // 通知 AutoTestWindow 连接已断开
-    if (m_autoTestWindow) {
-        m_autoTestWindow->onDisconnected();
-    }
-
-    appendLog(QString("[矢网] 连接已断开：%1").arg(info));
-}
-
-// ============================================================================
-//                     TCP 客户端连接/断开
-// ============================================================================
-
-void MainWindow::onNewConnection()
-{
-    while (m_tcpServer->hasPendingConnections()) {
-        // 检查连接上限
-        if (static_cast<int>(m_clients.size()) >= m_maxClients) {
-            QTcpSocket *rejected = m_tcpServer->nextPendingConnection();
-            QString peerInfo = QString("%1:%2")
-                               .arg(rejected->peerAddress().toString())
-                               .arg(rejected->peerPort());
-            appendLog(QString("[拒绝] 客户端 %1 尝试连接，已达上限（%2/%3）")
-                      .arg(peerInfo).arg(m_clients.size()).arg(m_maxClients));
-            rejected->disconnectFromHost();
-            rejected->deleteLater();
-            continue;
-        }
-
-        // 接受新连接
-        QTcpSocket *clientSocket = m_tcpServer->nextPendingConnection();
-        QString clientInfo = QString("%1:%2")
-                             .arg(clientSocket->peerAddress().toString())
-                             .arg(clientSocket->peerPort());
-        int clientId = static_cast<int>(m_clients.size()) + 1;
-
-        m_clients.append(clientSocket);
-
-        // 为该客户端创建独立的环形缓冲区（初始容量 128KB）
-        auto buffer = std::make_shared<RingBuffer>(128 * 1024);  // 128KB
-        m_clientBuffers.insert(clientSocket, buffer);
-
-        appendLog(QString("[连接] 客户端 #%1 已接入：%2（当前 %3/%4）")
-                  .arg(clientId).arg(clientInfo).arg(m_clients.size()).arg(m_maxClients));
-
-        // 连接断开和数据到达信号
-        connect(clientSocket, &QTcpSocket::disconnected, this, &MainWindow::onClientDisconnected);
-        connect(clientSocket, &QTcpSocket::readyRead, this, &MainWindow::onClientDataReady);
-    }
-}
-
-void MainWindow::onClientDisconnected()
-{
-    QTcpSocket *sock = qobject_cast<QTcpSocket*>(sender());
-    if (!sock) return;
-
-    QString info = QString("%1:%2")
-                   .arg(sock->peerAddress().toString())
-                   .arg(sock->peerPort());
-
-    int idx = m_clients.indexOf(sock);
-    if (idx >= 0) {
-        m_clients.removeAt(idx);
-    }
-
-    // 移除该客户端的环形缓冲区
-    m_clientBuffers.remove(sock);
-
-    sock->deleteLater();
-
-    appendLog(QString("[断开] 客户端 #%1 %2 已离开（剩余 %3/%4）")
-              .arg(idx + 1).arg(info).arg(m_clients.size()).arg(m_maxClients));
-}
-
-// ============================================================================
-//
-//                       ★ 数据接收核心 ★
-//                   TCP → 环形缓冲 → 帧解析 → 业务处理
-//
-// ============================================================================
-
-/**
- * @brief TCP 有数据可读时的回调
- *
- * 流程：
- *   1. 从 socket 读出所有原始字节
- *   2. 写入该客户端对应的 RingBuffer
- *   3. 循环尝试从 RingBuffer 中解析完整帧
- *   4. 每解出一帧，调用 handleReceivedFrame() 分发到业务处理
- */
-void MainWindow::onClientDataReady()
-{
-    QTcpSocket *sock = qobject_cast<QTcpSocket*>(sender());
-    if (!sock || !m_clientBuffers.contains(sock)) return;
-
-    // ====== 步骤1：读取 socket 所有可用数据 ======
-    QByteArray rawData = sock->readAll();
-    if (rawData.isEmpty()) return;
-
-    // ====== 步骤2：写入环形缓冲区 ======
-    auto &ringBuf = m_clientBuffers[sock];
-    size_t written = ringBuf->write(rawData);
-    Q_UNUSED(written);
-
-    // ====== 步骤3+4：循环解析完整帧 ======
     while (true) {
-        // 检查是否有足够数据构成一完整帧（1029字节）
         size_t available = ringBuf->readableBytes();
         if (!ProtocolCodec::hasCompleteFrame(static_cast<int>(available))) {
-            break; // 数据不够一整帧，等下次数据到来
+            break;
         }
 
-        // 预览足够多的数据用于帧搜索和解析
-        // 一次预览最大 64KB，防止一次性拷贝过多内存
         size_t peekSize = std::min(available, static_cast<size_t>(65536));
         QByteArray preview = ringBuf->peek(peekSize);
         if (preview.isEmpty()) break;
 
         DataFrame frame;
         int consumed = 0;
-
         bool parsed = ProtocolCodec::parse(preview, frame, consumed);
 
         if (!parsed) {
-            // 解析失败的原因：
-            //   - consumed > 0：跳过垃圾字节或无效帧头，继续循环重试
-            //   - consumed == 0：数据不足完整帧，退出等待更多数据
             if (consumed > 0) {
                 ringBuf->consume(static_cast<size_t>(consumed));
-                continue; // 跳过后重新尝试解析
+                continue;
             } else {
-                break; // 数据不足，退出循环
+                break;
             }
         }
 
-        // ====== 步骤5：解析成功！消费掉这帧的字节 ======
         ringBuf->consume(static_cast<size_t>(consumed));
-
-        // ====== 步骤6：分发到业务层处理 ======
-        handleReceivedFrame(sock, frame);
+        handleReceivedFrame(0, frame);
     }
+}
+
+// ============================================================================
+//                   NetworkManager 事件转发 — 矢网仪器
+// ============================================================================
+
+void MainWindow::onVnaConnected()
+{
+    // 通知 AutoTestWindow 连接已成功
+    if (m_autoTestWindow) {
+        m_autoTestWindow->onConnected();
+    }
+}
+
+void MainWindow::onVnaDisconnected()
+{
+    // 通知 AutoTestWindow 连接已断开
+    if (m_autoTestWindow) {
+        m_autoTestWindow->onDisconnected();
+    }
+}
+
+void MainWindow::onVnaDataReceived(const QByteArray &data)
+{
+    // TODO: 处理矢网仪器返回数据
+    appendLog(QString("[矢网←] %1 字节").arg(data.size()));
+}
+
+void MainWindow::onNetworkError(const QString &error)
+{
+    appendLog(QString("[ERROR] %1").arg(error));
+}
+
+void MainWindow::onNetworkLog(const QString &msg)
+{
+    // 直接追加日志（NetworkManager 日志带时间戳前缀）
+    appendLog(msg);
 }
 
 // ============================================================================
@@ -628,80 +511,54 @@ void MainWindow::onClientDataReady()
 //
 // ============================================================================
 
-/**
- * @brief 向指定客户端发送一帧完整数据
- *
- * 自动完成：
- *   - 构建 DataFrame 结构体
- *   - 调用 ProtocolCodec::encode() 序列化（含帧头、长度、CRC校验）
- *   - 通过 socket 发送
- *
- * @return true=写入socket成功；false=发送失败或socket无效
- */
-bool MainWindow::sendFrame(QTcpSocket *client, quint8 command, const QByteArray &payload)
+bool MainWindow::sendFrame(int clientId, quint8 command, const QByteArray &payload)
 {
-    if (!client || client->state() != QTcpSocket::ConnectedState) {
-        appendLog("[发送失败] 目标客户端未连接");
-        return false;
-    }
-
     DataFrame frame;
     frame.command = command;
     frame.payload = payload;
 
     QByteArray packet = ProtocolCodec::encode(frame);
 
-    qint64 sent = client->write(packet);
-    if (sent != packet.size()) {
-        appendLog(QString("[发送异常] 只写出 %1/%2 字节").arg(sent).arg(packet.size()));
-        return false;
+    if (clientId == 0) {
+        // 主界面客户端模式 → 通过 NetworkManager 发送
+        bool ok = m_network->sendToServer(packet);
+        if (!ok) appendLog("[发送失败] 目标客户端未连接");
+        return ok;
+    } else {
+        // 服务端客户端模式 → 通过 NetworkManager 发送
+        bool ok = m_network->sendToClient(clientId, packet);
+        if (!ok) appendLog(QString("[发送失败] 客户端 #%1 未连接").arg(clientId));
+        return ok;
     }
-
-    client->flush(); // 尽快发出
-
-    QString cmdName = commandName(command);
-    appendLog(QString("[发送→%1] 命令=%2 数据长度=%3 字节")
-              .arg(clientPeerLabel(client)).arg(cmdName).arg(payload.size()));
-
-    return true;
 }
 
-/**
- * @brief 向所有已连接的客户端广播同一帧数据
- */
 void MainWindow::broadcastFrame(quint8 command, const QByteArray &payload)
 {
-    // 拷贝客户端列表，防止发送过程中 onClientDisconnected 修改 m_clients
-    QVector<QTcpSocket*> clientsCopy = m_clients;
-    for (QTcpSocket *client : clientsCopy) {
-        sendFrame(client, command, payload);
-    }
+    DataFrame frame;
+    frame.command = command;
+    frame.payload = payload;
+    QByteArray packet = ProtocolCodec::encode(frame);
+
+    m_network->broadcastToClients(packet);
+
+    QString cmdName = commandName(command);
+    appendLog(QString("[广播] 命令=%2 数据长度=%3 字节").arg(cmdName).arg(payload.size()));
 }
 
 /**
- * @brief 接收子窗口发出的原始控制指令，直接广播给所有已连接客户端
- *
- * 用于发送短控制命令（如天线开关机），这些指令不需要经过协议帧编解码，
- * 直接将原始字节流写入 socket。
+ * @brief 接收子窗口发出的原始控制指令，通过主界面客户端发送
  */
 void MainWindow::onSendRawCommand(const QByteArray &command)
 {
-    // 构造可读的十六进制字符串用于日志显示
     QString hexStr = command.toHex(' ').toUpper();
 
     // 客户端模式下，通过 clientSocket 向服务器发送指令
-    if (m_clientConnected && m_clientSocket
-        && m_clientSocket->state() == QTcpSocket::ConnectedState) {
-        qint64 sent = m_clientSocket->write(command);
-        if (sent == command.size()) {
-            m_clientSocket->flush();
-            appendLog(QString("[指令发送→服务器] %1 字节 [%2]")
-                      .arg(command.size()).arg(hexStr));
-            return;
-        }
+    if (m_network->isClientConnected() && m_network->sendToServer(command)) {
+        appendLog(QString("[指令发送→服务器] %1 字节 [%2]")
+                  .arg(command.size()).arg(hexStr));
+    } else {
+        appendLog("[指令] 无可用连接，无法发送指令");
     }
-
-    appendLog("[指令] 无可用连接，无法发送指令");
 }
 
 // ============================================================================
@@ -712,22 +569,14 @@ void MainWindow::onSendRawCommand(const QByteArray &command)
 
 /**
  * @brief 1秒周期定时器回调：向特定IP的客户端发送周期指令 {0xEB, 0x90, 0x02, 0xC0, 0x05}
- *
- * 仅向 IP 匹配 m_targetClientIP 的客户端发送。
- * 如果目标客户端未连接或已断开，则跳过本次发送（不报错，静默处理）。
  */
 void MainWindow::onPeriodicCommandTimer()
 {
     QByteArray periodicCmd = QByteArray::fromRawData("\xEB\x90\x02\xC0\x05", 5);
 
     // 客户端模式下，向服务器发送周期指令
-    if (m_clientConnected && m_clientSocket
-        && m_clientSocket->state() == QTcpSocket::ConnectedState) {
-        qint64 sent = m_clientSocket->write(periodicCmd);
-        m_clientSocket->flush();
-        if (sent == periodicCmd.size()) {
-            appendLog("[周期指令→服务器] [EB 90 02 C0 05]");
-        }
+    if (m_network->isClientConnected() && m_network->sendToServer(periodicCmd)) {
+        appendLog("[周期指令→服务器] [EB 90 02 C0 05]");
     }
 }
 
@@ -737,12 +586,9 @@ void MainWindow::onPeriodicCommandTimer()
 //
 // ============================================================================
 
-/**
- * @brief 根据命令码将收到的完整帧分发到对应的处理函数
- */
-void MainWindow::handleReceivedFrame(QTcpSocket *client, const DataFrame &frame)
+void MainWindow::handleReceivedFrame(int clientId, const DataFrame &frame)
 {
-    QString src = clientPeerLabel(client);
+    QString src = clientPeerLabel(clientId);
     QString cmdName = commandName(frame.command);
 
     appendLog(QString("[接收←%1] 命令=%2 数据长度=%3 字节")
@@ -750,7 +596,7 @@ void MainWindow::handleReceivedFrame(QTcpSocket *client, const DataFrame &frame)
 
     switch (frame.command) {
     case Protocol::Cmd::TELEMETRY_DATA:
-        handleTelemetryData(client, frame);
+        handleTelemetryData(clientId, frame);
         break;
 
     default:
@@ -765,51 +611,48 @@ void MainWindow::handleReceivedFrame(QTcpSocket *client, const DataFrame &frame)
 // ============================================================================
 
 /** 心跳包 — 自动回复心跳应答 */
-void MainWindow::handleHeartbeat(QTcpSocket *client, const DataFrame &frame)
+void MainWindow::handleHeartbeat(int clientId, const DataFrame &frame)
 {
+    Q_UNUSED(clientId)
     Q_UNUSED(frame)
-
 }
 
 /** 遥测数据上传 — 接收客户端上报的遥测数据 */
-void MainWindow::handleTelemetryData(QTcpSocket *client, const DataFrame &frame)
+void MainWindow::handleTelemetryData(int clientId, const DataFrame &frame)
 {
-    Q_UNUSED(client)
+    Q_UNUSED(clientId)
 
     if (m_antennaDeviceWindow) {
         m_antennaDeviceWindow->parseWaveControlTelemetry(frame.payload);
     }
-    // 温度窗口独立解析112路测温+50路开关
     if (temperatureTab) {
         temperatureTab->parseThermalTelemetry(frame.payload);
     }
 }
 
-/** 遥控指令应答 — 客户端对遥控指令的执行结果反馈 */
-void MainWindow::handleControlAck(QTcpSocket *client, const DataFrame &frame)
+/** 遥控指令应答 */
+void MainWindow::handleControlAck(int clientId, const DataFrame &frame)
 {
-    Q_UNUSED(client)
+    Q_UNUSED(clientId)
 
-    // payload 通常包含：[指令序号][执行结果(0成功/非0失败)][附加信息]
     if (frame.payload.size() >= 1) {
         quint8 result = static_cast<quint8>(frame.payload.at(0));
         appendLog(QString("    遥控应答: 结果=%1").arg(result == 0 ? "成功" : "失败"));
     }
 }
 
-/** 设备状态上报 — 客户端上报自身设备运行状态 */
-void MainWindow::handleDeviceStatus(QTcpSocket *client, const DataFrame &frame)
+/** 设备状态上报 */
+void MainWindow::handleDeviceStatus(int clientId, const DataFrame &frame)
 {
-    Q_UNUSED(client)
+    Q_UNUSED(clientId)
     Q_UNUSED(frame)
-    // TODO: 解析设备状态并更新UI显示
     appendLog("    设备状态已收到");
 }
 
-/** 错误报告 — 客户端报告错误信息 */
-void MainWindow::handleErrorReport(QTcpSocket *client, const DataFrame &frame)
+/** 错误报告 */
+void MainWindow::handleErrorReport(int clientId, const DataFrame &frame)
 {
-    Q_UNUSED(client)
+    Q_UNUSED(clientId)
     if (!frame.payload.isEmpty()) {
         QString errMsg = QString::fromUtf8(frame.payload);
         appendLog(QString("    └ 错误报告: %1").arg(errMsg));
@@ -825,7 +668,6 @@ void MainWindow::appendLog(const QString &message)
     QString timestamp = QDateTime::currentDateTime().toString("[hh:mm:ss]");
     ui->logPlainTextEdit->appendPlainText(timestamp + " " + message);
 
-    // 限制最大行数，防止长时间运行后内存无限增长
     constexpr int MAX_LOG_LINES = 5000;
     QTextDocument *doc = ui->logPlainTextEdit->document();
     if (doc->blockCount() > MAX_LOG_LINES) {
@@ -833,7 +675,7 @@ void MainWindow::appendLog(const QString &message)
         cursor.movePosition(QTextCursor::Start);
         cursor.select(QTextCursor::BlockUnderCursor);
         cursor.removeSelectedText();
-        cursor.deleteChar(); // 删除换行符
+        cursor.deleteChar();
     }
 
     QTextCursor cursor = ui->logPlainTextEdit->textCursor();
@@ -846,22 +688,20 @@ void MainWindow::updateDateTime()
     m_timeLabel->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
 }
 
-/** 获取客户端的可读标签（用于日志） */
-QString MainWindow::clientPeerLabel(QTcpSocket *client)
+QString MainWindow::clientPeerLabel(int clientId)
 {
-    if (!client) return "(null)";
-    return QString("%1:%2").arg(client->peerAddress().toString()).arg(client->peerPort());
+    if (clientId == 0) {
+        // 主界面客户端
+        return "主客户端";
+    }
+    // 从 NetworkManager 获取信息（简化处理）
+    return QString("客户端#%1").arg(clientId);
 }
 
-/** 将指令码转为可读名称 */
 QString MainWindow::commandName(quint8 cmd)
 {
     switch (cmd) {
-//    case Protocol::Cmd::HEARTBEAT:      return "心跳";
     case Protocol::Cmd::TELEMETRY_DATA: return "遥测数据";
-//    case Protocol::Cmd::CONTROL_CMD:    return "遥控指令";
-//    case Protocol::Cmd::DEVICE_STATUS:  return "设备状态";
-//    case Protocol::Cmd::ERROR_REPORT:   return "错误报告";
     default:                            return QString("0x%1").arg(cmd, 2, 16, QLatin1Char('0'));
     }
 }
@@ -881,35 +721,18 @@ void MainWindow::onActionAutoTestWindow()
         connect(m_autoTestWindow, &AutoTestWindow::antennaPowerOffRequested,
                 m_antennaDeviceWindow, &AntennaDeviceWindow::antennaPowerOff);
 
-        // 矢网仪器连接/断开请求转发（独立 socket，与主页面客户端模式无关）
+        // ★★★ 矢网连接请求转发到 NetworkManager ★★★
         connect(m_autoTestWindow, &AutoTestWindow::connectToHostRequested,
                 this, [this](const QString &ip, quint16 port) {
-            if (!m_vnaSocket) {
-                m_vnaSocket = new QTcpSocket(this);
-                connect(m_vnaSocket, &QTcpSocket::readyRead,
-                        this, &MainWindow::onVnaSocketReadyRead);
-                connect(m_vnaSocket, &QTcpSocket::disconnected,
-                        this, &MainWindow::onVnaSocketDisconnected);
-            }
-
-            m_vnaSocket->connectToHost(QHostAddress(ip), port);
-            if (m_vnaSocket->waitForConnected(3000)) {
-                m_vnaConnected = true;
-                m_autoTestWindow->onConnected();
-                appendLog(QString("[矢网] 已连接到 %1:%2").arg(ip).arg(port));
-            } else {
+            if (!m_network->connectToVna(ip, port)) {
                 QMessageBox::critical(this, "错误",
-                    QString("无法连接到矢网仪器！\n%1").arg(m_vnaSocket->errorString()));
-                appendLog(QString("[ERROR] 矢网连接失败：%1").arg(m_vnaSocket->errorString()));
+                    QString("无法连接到矢网仪器！\n%1").arg("请检查网络设置"));
             }
         });
 
         connect(m_autoTestWindow, &AutoTestWindow::disconnectFromHostRequested,
                 this, [this]() {
-            if (m_vnaConnected && m_vnaSocket) {
-                m_vnaSocket->disconnectFromHost();
-                // 断开后的 UI 更新和日志由 onVnaSocketDisconnected() 统一处理
-            }
+            m_network->disconnectFromVna();
         });
     }
     m_autoTestWindow->show();

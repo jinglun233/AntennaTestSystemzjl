@@ -16,6 +16,7 @@ win32 {
 SOURCES += \
     antennadevicewindow.cpp \
     autotestwindow.cpp \
+    networkmanager.cpp \
     customtabbar.cpp \
     customtabwidget.cpp \
     dataprotocol.cpp \
@@ -31,6 +32,7 @@ SOURCES += \
 HEADERS += \
     antennadevicewindow.h \
     autotestwindow.h \
+    networkmanager.h \
     customtabbar.h \
     customtabwidget.h \
     dataprotocol.h \

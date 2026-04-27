@@ -1,20 +1,20 @@
-void on_actionAbout_triggered();
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QLabel>
 #include <QTimer>
-#include <QTcpServer>
-#include <QTcpSocket>
 #include <QComboBox>
-#include <QVector>
-#include <QMap>
-#include <memory>          // std::shared_ptr
+#include <memory>
 
-// 新增：数据收发
+// 网络管理层（统一封装 TCP Server / Client / VNA）
+#include "networkmanager.h"
+
+// 数据收发
 #include "ringbuffer.h"
 #include "dataprotocol.h"
+
+// 子窗口
 #include "antennadevicewindow.h"
 #include "electronicdevicewindow.h"
 #include "temperatureinfowindow.h"
@@ -31,10 +31,21 @@ QT_END_NAMESPACE
  */
 enum class WorkMode {
     None = 0,           // 未选择模式
-    AntennaGroundTest,  // 单独天线地检模式（允许连接1个客户端）
-    SimulateDevice      // 模拟电子设备模式（允许连接2个客户端）
+    AntennaGroundTest,  // 单独天线地检模式（客户端模式，连接外部服务器）
+    SimulateDevice      // 模拟电子设备模式（服务器+客户端双模式）
 };
 
+/**
+ * @brief 主窗口
+ *
+ * 职责：
+ *   1. UI 主界面控制器（工作模式、状态栏、菜单栏）
+ *   2. 通过 NetworkManager 管理 TCP 服务器/客户端连接
+ *   3. 数据帧解析与业务分发
+ *   4. 子窗口生命周期管理（Tab 子窗口 + 菜单弹窗子窗口）
+ *
+ * Socket 生命周期完全委托给 NetworkManager，MainWindow 不直接操作 QTcpSocket。
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -58,37 +69,25 @@ private:
     WorkMode m_currentMode;
     QLabel *m_modeStatusLabel;
 
-    // ========== TCP 服务器相关 ==========
-    QTcpServer *m_tcpServer;
-    QVector<QTcpSocket*> m_clients;
-    int m_maxClients;
-    bool m_serverRunning;
-
-    // ========== TCP 客户端相关（模式0：天线地检模式作为客户端） ==========
-    QTcpSocket *m_clientSocket;   // 客户端模式下的主动连接 socket
-    bool m_clientConnected;       // 客户端连接状态
-
-    // ========== 矢网仪器 TCP 连接（独立） ==========
-    QTcpSocket *m_vnaSocket;      // 矢网仪器连接 socket
-    bool m_vnaConnected;          // 矢网连接状态
+    // ★★★ 核心变更：统一网络管理器（替代所有原始 QTcpSocket）★★★
+    NetworkManager *m_network;
 
     // ========== 数据收发相关 ==========
     /**
-     * @brief 每个客户端对应一个环形缓冲区
+     * @brief 每个服务端客户端对应一个环形缓冲区（用于帧解析）
      *
-     * key = QTcpSocket* (客户端socket指针)
-     * value = 该客户端的接收缓冲区
+     * key = 客户端ID（int），value = 该客户端的接收缓冲区
      */
-    QMap<QTcpSocket*, std::shared_ptr<RingBuffer>> m_clientBuffers;
+    QMap<int, std::shared_ptr<RingBuffer>> m_clientBuffers;
 
-    // ========== 设备子窗口 ==========
-    AntennaDeviceWindow *m_antennaDeviceWindow;
+    // ========== 设备子窗口（Tab 页，有 parent = this） ==========
+    AntennaDeviceWindow   *m_antennaDeviceWindow;
     ElectronicDeviceWindow *electronicTab;
     TemperatureInfoWindow *temperatureTab;
-    PowerVoltageWindow *powerTab;
+    PowerVoltageWindow     *powerTab;
 
-    // ========== 菜单子窗口 ==========
-    AutoTestWindow *m_autoTestWindow;
+    // ========== 菜单弹窗子窗口（有 parent = this） ==========
+    AutoTestWindow        *m_autoTestWindow;
     InstrumentControlWindow *m_instrumentControlWindow;
 
 private slots:
@@ -97,21 +96,29 @@ private slots:
     void onCancelModeClicked();
     void onStartServerClicked();
     void onStopServerClicked();
-    void onNewConnection();
-    void onClientDisconnected();
-    void onClientDataReady();          // TCP 数据到达 → 写入环形缓冲 → 尝试解析帧
-    void onSendRawCommand(const QByteArray &command);  // 接收子窗口原始指令，广播给所有客户端
-    void onPeriodicCommandTimer();                     // 周期性指令定时器回调（1s）
 
-    // ========== 客户端模式槽函数 ==========
-    void onConnectClientClicked();
-    void onDisconnectClientClicked();
-    void onClientSocketReadyRead();
-    void onClientSocketDisconnected();
+    // 原始控制指令发送（来自子窗口信号）
+    void onSendRawCommand(const QByteArray &command);
+    // 周期性指令定时器回调（1s）
+    void onPeriodicCommandTimer();
 
-    // ========== 矢网仪器连接槽函数 ==========
-    void onVnaSocketReadyRead();
-    void onVnaSocketDisconnected();
+    // ========== NetworkManager 事件转发 ==========
+    void onServerStarted();                          // 服务器启动成功
+    void onServerStopped();                          // 服务器已停止
+    void onServerClientConnected(const ConnectionHandle &h);   // 服务端新客户端接入
+    void onServerClientDisconnected(const ConnectionHandle &h);// 服务端客户端断开
+    void onServerDataReceived(const ConnectionHandle &h, const QByteArray &data);
+
+    void onMainClientConnected();                    // 主界面客户端连接成功
+    void onMainClientDisconnected();                 // 主界面客户端断开
+    void onMainClientDataReceived(const QByteArray &data);
+
+    void onVnaConnected();                           // 矢网连接成功
+    void onVnaDisconnected();                        // 矢网断开
+    void onVnaDataReceived(const QByteArray &data);
+
+    void onNetworkError(const QString &error);       // 网络错误
+    void onNetworkLog(const QString &msg);           // 网络日志
 
     // ========== 菜单栏槽函数 ==========
     void onActionAutoTestWindow();
@@ -132,45 +139,20 @@ private:
     void appendLog(const QString &msg);
 
     // ========== 数据收发核心方法 ==========
-
-    /**
-     * @brief 向指定客户端发送一帧完整数据（自动打包+校验）
-     * @param client 目标客户端 socket
-     * @param command 指令码（Protocol::Cmd::*）
-     * @param payload 数据域
-     * @return true=发送成功
-     */
-    bool sendFrame(QTcpSocket *client, quint8 command, const QByteArray &payload);
-
-    /**
-     * @brief 向所有已连接客户端广播发送一帧数据
-     * @param command 指令码
-     * @param payload 数据域
-     */
+    bool sendFrame(int clientId, quint8 command, const QByteArray &payload);
     void broadcastFrame(quint8 command, const QByteArray &payload);
+    void handleReceivedFrame(int clientId, const DataFrame &frame);
 
-    /**
-     * @brief 处理从环形缓冲中解析出的完整数据帧
-     *
-     * 此方法是"业务层入口"，每解出一帧就会调用一次。
-     * 根据命令码分发到具体处理函数。
-     *
-     * @param client 来源客户端
-     * @param frame  解析完成的帧
-     */
-    void handleReceivedFrame(QTcpSocket *client, const DataFrame &frame);
+    // ========== 业务处理 ==========
+    void handleHeartbeat(int clientId, const DataFrame &frame);
+    void handleTelemetryData(int clientId, const DataFrame &frame);
+    void handleControlAck(int clientId, const DataFrame &frame);
+    void handleDeviceStatus(int clientId, const DataFrame &frame);
+    void handleErrorReport(int clientId, const DataFrame &frame);
 
-    // ========== 业务处理（可按需扩展） ==========
-    void handleHeartbeat(QTcpSocket *client, const DataFrame &frame);      // 心跳包
-    void handleTelemetryData(QTcpSocket *client, const DataFrame &frame);   // 遥测数据上传
-    void handleControlAck(QTcpSocket *client, const DataFrame &frame);      // 遥控应答
-    void handleDeviceStatus(QTcpSocket *client, const DataFrame &frame);    // 设备状态上报
-    void handleErrorReport(QTcpSocket *client, const DataFrame &frame);     // 错误报告
-
-private:
-    // ========== 内部辅助（日志标签） ==========
-    QString clientPeerLabel(QTcpSocket *client);  // 客户端地址标签
-    QString commandName(quint8 cmd);                // 指令码可读名称
+    // ========== 内部辅助 ==========
+    QString clientPeerLabel(int clientId);
+    QString commandName(quint8 cmd);
 };
 
 #endif // MAINWINDOW_H
