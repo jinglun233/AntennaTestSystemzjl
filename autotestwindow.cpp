@@ -396,12 +396,21 @@ void AutoTestWindow::doDownloadWaveCode()
         return;
     }
 
-    // 构造完整路径：根目录 / 通道名（含反斜杠子目录）
-    // 配置表中的值如 "CS01HR\模块1组件1通道1"，\ 是子目录分隔符
-    // 需统一转为 / 后规范化拼接
-    QString normalized = m_currentChannelName;
-    normalized.replace('\\', '/');
-    QString fullPath = QDir::cleanPath(m_waveDirPath + '/' + normalized);
+    // 构造完整路径
+    // waveCodeLineEdit 可能已选到 "D:/.../CS01HR"，配置表值为 "CS01HR\模块1组件1通道1"
+    // 需要去掉配置表值中与根目录末尾重复的部分，避免 CS01HR 重复
+    QString dirBase = QDir::cleanPath(m_waveDirPath);          // D:/.../热实验波位/CS01HR
+    QString subPath = m_currentChannelName;                     // CS01HR\模块1组件1通道1
+    subPath.replace('\\', '/');                                 // CS01HR/模块1组件1通道1
+
+    // 去掉 subPath 前面与 dirBase 最后一级目录相同的部分
+    QString lastDir = dirBase.section('/', -1, -1).toLower();   // cs01hr (小写比较)
+    QString firstPart = subPath.section('/', 0, 0).toLower();   // cs01hr
+    if (!lastDir.isEmpty() && !firstPart.isEmpty() && lastDir == firstPart) {
+        subPath = subPath.section('/', 1);                      // → 模块1组件1通道1
+    }
+
+    QString fullPath = QDir::cleanPath(dirBase + '/' + subPath);
 
     // 检查文件是否存在
     if (!QFile::exists(fullPath)) {
