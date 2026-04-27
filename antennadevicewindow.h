@@ -22,6 +22,20 @@ public slots:
     void updateWaveControlTelemetry(int waveId, const QVector<QString> &values);
     void parseWaveControlTelemetry(const QByteArray &payload);
 
+public:
+    void antennaPowerOn();   // 天线加电（供外部调用）
+    void antennaPowerOff();  // 天线断电（供外部调用）
+    void startPrf();         // 开始PRF（供外部调用）
+    void stopPrf();          // 停止PRF（供外部调用）
+
+    /**
+     * @brief 从单个文件路径下发波控码（自动测试流程使用）
+     * @param filePath 波控码 txt 文件的完整路径
+     *
+     * 读取指定文件的二进制内容，分页发送到服务器，每页间隔50ms。
+     */
+    void downloadSingleWaveCode(const QString &filePath);
+
 signals:
     void antennaControlCommand(double targetAngle, double rotationSpeed, int controlMode, double accuracy);
     void sendRawCommandToServer(const QByteArray &command);  // 向服务端发送原始控制指令

@@ -721,7 +721,28 @@ void MainWindow::onActionAutoTestWindow()
         connect(m_autoTestWindow, &AutoTestWindow::antennaPowerOffRequested,
                 m_antennaDeviceWindow, &AntennaDeviceWindow::antennaPowerOff);
 
-        // ★★★ 矢网连接请求转发到 NetworkManager ★★★
+        // ★★★ 波控码下发请求 → AntennaDeviceWindow（单个文件）★★★
+        connect(m_autoTestWindow, &AutoTestWindow::waveCodeDownloadRequested,
+                m_antennaDeviceWindow, &AntennaDeviceWindow::downloadSingleWaveCode);
+
+        // ★★★ PRF 启动/停止 → AntennaDeviceWindow ★★★
+        connect(m_autoTestWindow, &AutoTestWindow::startPrfRequested,
+                m_antennaDeviceWindow, &AntennaDeviceWindow::startPrf);
+        connect(m_autoTestWindow, &AutoTestWindow::stopPrfRequested,
+                m_antennaDeviceWindow, &AntennaDeviceWindow::stopPrf);
+
+        // ★★★ 矢网 SCPI 指令 → NetworkManager::sendToVna（转 ASCII 发送）★★★
+        connect(m_autoTestWindow, &AutoTestWindow::vnaScpiCommandRequested,
+                this, [this](const QString &scpiCommand) {
+            if (m_network->isVnaConnected()) {
+                QByteArray data = scpiCommand.toLatin1();
+                m_network->sendToVna(data);
+            } else {
+                appendLog("[ERROR] 矢网未连接，无法发送 SCPI 指令");
+            }
+        });
+
+        // 矢网连接/断开请求转发到 NetworkManager
         connect(m_autoTestWindow, &AutoTestWindow::connectToHostRequested,
                 this, [this](const QString &ip, quint16 port) {
             if (!m_network->connectToVna(ip, port)) {

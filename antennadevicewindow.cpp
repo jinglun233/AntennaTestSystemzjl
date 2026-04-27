@@ -371,6 +371,82 @@ void AntennaDeviceWindow::antennaPowerOff()
     emit sendRawCommandToServer(command);
 }
 
+void AntennaDeviceWindow::startPrf()
+{
+    QByteArray command = QByteArray::fromRawData("\xEB\x90\x01\xF1\x05", 5);
+    emit sendRawCommandToServer(command);
+}
+
+void AntennaDeviceWindow::stopPrf()
+{
+    QByteArray command = QByteArray::fromRawData("\xEB\x90\x01\xF0\x05", 5);
+    emit sendRawCommandToServer(command);
+}
+
+/**
+ * @brief 从单个文件下发波控码（自动测试流程调用）
+ *
+ * 读取单个 txt 文件，解析二进制波控码数据，
+ * 分页发送（每页1024字节），页间间隔50ms。
+ */
+void AntennaDeviceWindow::downloadSingleWaveCode(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        emit sendRawCommandToServer(QByteArray()); // 空信号表示错误
+        return;
+    }
+
+    QString strContent = QString::fromUtf8(file.readAll());
+    file.close();
+
+    // 去除空格
+    strContent = strContent.replace(" ", "");
+
+    // 补齐到8的倍数
+    int remainder = strContent.length() % 8;
+    if (remainder != 0) {
+        strContent = strContent.leftJustified(strContent.length() + (8 - remainder), '0');
+    }
+
+    // 二进制字符串 → 字节数组
+    QByteArray data;
+    for (int i = 0; i < strContent.length() / 8; i++) {
+        QString tempBinary = strContent.mid(i * 8, 8);
+        bool ok;
+        unsigned short value = tempBinary.toUShort(&ok, 2);
+        if (ok) {
+            data.append(static_cast<char>(value));
+        }
+    }
+
+    if (data.isEmpty()) {
+        return;
+    }
+
+    // 分页发送（与 uploadPagedData 相同逻辑）
+    int totalPages = qCeil(static_cast<double>(data.size()) / 1024.0);
+
+    // 先发总页数指令
+    sendBokongCode(totalPages, 0xB0);
+
+    QThread::msleep(50);
+
+    int page = 1;
+    int offset = 0;
+    while (offset < data.size()) {
+        int remaining = data.size() - offset;
+        int copySize = qMin(remaining, 1024);
+        QByteArray dataPage = data.mid(offset, copySize);
+
+        bokongMaSend(dataPage, page);
+        page++;
+        offset += copySize;
+
+        QThread::msleep(50);  // 页间间隔 50ms
+    }
+}
+
 void AntennaDeviceWindow::on_antennaPowerOnButton_clicked()
 {
     antennaPowerOn();
