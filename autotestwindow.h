@@ -73,6 +73,9 @@ private slots:
     // ★★★ 测试流程状态机驱动 ★★★
     void onTestStepTimer();          // 定时器回调：执行下一步
 
+    // 波控码异步下发完成回调（由 AntennaDeviceWindow::waveCodeDownloadCompleted 触发）
+    void onWaveCodeDownloadCompleted(bool ok, int totalPages);
+
 private:
     // ========== UI 辅助 ==========
     void appendResult(const QString &text);

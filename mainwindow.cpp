@@ -725,6 +725,10 @@ void MainWindow::onActionAutoTestWindow()
         connect(m_autoTestWindow, &AutoTestWindow::waveCodeDownloadRequested,
                 m_antennaDeviceWindow, &AntennaDeviceWindow::downloadSingleWaveCode);
 
+        // ★★★ 波控码下发完成 → AutoTestWindow 继续推进状态机 ★★★
+        connect(m_antennaDeviceWindow, &AntennaDeviceWindow::waveCodeDownloadCompleted,
+                m_autoTestWindow, &AutoTestWindow::onWaveCodeDownloadCompleted);
+
         // ★★★ PRF 启动/停止 → AntennaDeviceWindow ★★★
         connect(m_autoTestWindow, &AutoTestWindow::startPrfRequested,
                 m_antennaDeviceWindow, &AntennaDeviceWindow::startPrf);

@@ -16,10 +16,18 @@ AntennaDeviceWindow::AntennaDeviceWindow(QWidget *parent)
     , m_wave2DFilePath()
     , m_basicParamFilePath()
     , m_layoutCtrlFilePath()
+    , m_wavePageTimer(nullptr)
+    , m_totalPages(0)
+    , m_currentPageIndex(0)
 {
     ui->setupUi(this);
 
     initTelemetryTables();
+
+    // 异步波控码分页定时器（单次触发，50ms 间隔）
+    m_wavePageTimer = new QTimer(this);
+    m_wavePageTimer->setSingleShot(true);
+    connect(m_wavePageTimer, &QTimer::timeout, this, &AntennaDeviceWindow::onWavePageTimer);
 
     connect(ui->prfValueLineEdit, &QLineEdit::textChanged, this, &AntennaDeviceWindow::updateDutyCycle);
     connect(ui->pulseWidthLineEdit, &QLineEdit::textChanged, this, &AntennaDeviceWindow::updateDutyCycle);
@@ -384,16 +392,22 @@ void AntennaDeviceWindow::stopPrf()
 }
 
 /**
- * @brief 从单个文件下发波控码（自动测试流程调用）
+ * @brief 从单个文件下发波控码（异步驱动，自动测试流程调用）
  *
- * 读取单个 txt 文件，解析二进制波控码数据，
- * 分页发送（每页1024字节），页间间隔50ms。
+ * 读取单个 txt 文件 → 解析二进制波控码数据 → 发送总页数指令
+ * → 启动 QTimer 逐页异步发送（每页间隔50ms）
+ * → 全部完成后发出 waveCodeDownloadCompleted 信号
  */
 void AntennaDeviceWindow::downloadSingleWaveCode(const QString &filePath)
 {
+    // 如果定时器正在跑（上一次还没发完），先停掉
+    if (m_wavePageTimer && m_wavePageTimer->isActive()) {
+        m_wavePageTimer->stop();
+    }
+
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        emit sendRawCommandToServer(QByteArray()); // 空信号表示错误
+        emit waveCodeDownloadCompleted(false, 0);
         return;
     }
 
@@ -421,29 +435,58 @@ void AntennaDeviceWindow::downloadSingleWaveCode(const QString &filePath)
     }
 
     if (data.isEmpty()) {
+        emit waveCodeDownloadCompleted(false, 0);
         return;
     }
 
-    // 分页发送（与 uploadPagedData 相同逻辑）
-    int totalPages = qCeil(static_cast<double>(data.size()) / 1024.0);
+    // 存储到成员变量，供定时器逐页读取
+    m_pendingWaveData = data;
+    m_totalPages = qCeil(static_cast<double>(data.size()) / 1024.0);
+    m_currentPageIndex = 0;
 
-    // 先发总页数指令
-    sendBokongCode(totalPages, 0xB0);
+    // 先发总页数指令（第0步：告诉服务端一共多少页）
+    sendBokongCode(m_totalPages, 0xB0);
 
-    QThread::msleep(50);
+    // 启动定时器：50ms 后发送第一页数据
+    m_wavePageTimer->start(50);
+}
 
-    int page = 1;
-    int offset = 0;
-    while (offset < data.size()) {
-        int remaining = data.size() - offset;
-        int copySize = qMin(remaining, 1024);
-        QByteArray dataPage = data.mid(offset, copySize);
+/**
+ * @brief 异步分页定时器回调 — 每次发送一页波控码
+ *
+ * 每次触发时从 m_pendingWaveData 中取 1024 字节作为一页，
+ * 调用 bokongMaSend() 发送。全部发完后发出完成信号。
+ */
+void AntennaDeviceWindow::onWavePageTimer()
+{
+    if (m_pendingWaveData.isEmpty() || m_currentPageIndex >= m_totalPages) {
+        // 全部发送完毕
+        emit waveCodeDownloadCompleted(true, m_totalPages);
+        m_pendingWaveData.clear();
+        m_totalPages = 0;
+        m_currentPageIndex = 0;
+        return;
+    }
 
-        bokongMaSend(dataPage, page);
-        page++;
-        offset += copySize;
+    int offset = m_currentPageIndex * 1024;
+    int remaining = m_pendingWaveData.size() - offset;
+    int copySize = qMin(remaining, 1024);
+    QByteArray dataPage = m_pendingWaveData.mid(offset, copySize);
 
-        QThread::msleep(50);  // 页间间隔 50ms
+    // 发送当前页（页码从1开始）
+    bokongMaSend(dataPage, m_currentPageIndex + 1);
+
+    m_currentPageIndex++;
+
+    // 还有下一页？继续安排 50ms 后发送
+    if (m_currentPageIndex < m_totalPages) {
+        m_wavePageTimer->start(50);
+    } else {
+        // 全部完毕
+        emit waveCodeDownloadCompleted(true, m_totalPages);
+        m_pendingWaveData.clear();
+        m_totalPages = 0;
+        m_currentPageIndex = 0;
     }
 }
 

@@ -29,16 +29,24 @@ public:
     void stopPrf();          // 停止PRF（供外部调用）
 
     /**
-     * @brief 从单个文件路径下发波控码（自动测试流程使用）
+     * @brief 从单个文件路径下发波控码（自动测试流程使用，异步驱动）
      * @param filePath 波控码 txt 文件的完整路径
      *
-     * 读取指定文件的二进制内容，分页发送到服务器，每页间隔50ms。
+     * 读取指定文件的二进制内容，通过 QTimer 分页异步发送到服务器，每页间隔50ms。
+     * 全部发送完毕后发出 waveCodeDownloadCompleted 信号。
      */
     void downloadSingleWaveCode(const QString &filePath);
 
 signals:
     void antennaControlCommand(double targetAngle, double rotationSpeed, int controlMode, double accuracy);
     void sendRawCommandToServer(const QByteArray &command);  // 向服务端发送原始控制指令
+
+    /**
+     * @brief 波控码异步下发完成信号
+     * @param ok 是否成功
+     * @param totalPages 总页数
+     */
+    void waveCodeDownloadCompleted(bool ok, int totalPages);
 
 public:
     void antennaPowerOn();   // 天线加电（供外部调用）
@@ -72,6 +80,9 @@ private slots:
     void on_stopButton_clicked();
     void onBukongSettingChanged(int index);
 
+    // 异步分页定时器回调
+    void onWavePageTimer();
+
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
@@ -93,6 +104,12 @@ private:
     QString m_wave2DFilePath;
     QString m_basicParamFilePath;
     QString m_layoutCtrlFilePath;
+
+    // 异步波控码下发状态
+    QTimer *m_wavePageTimer;           // 分页定时器（50ms/页）
+    QByteArray m_pendingWaveData;      // 待发送的波控码数据
+    int m_totalPages;                  // 总页数
+    int m_currentPageIndex;            // 当前页索引（0-based）
 };
 
 #endif // ANTENNADEVICEWINDOW_H

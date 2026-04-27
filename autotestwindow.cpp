@@ -377,12 +377,14 @@ void AutoTestWindow::doReadConfig()
 }
 
 /**
- * @brief 步骤2：读取并下发当前通道的波控码文件
+ * @brief 步骤2：读取并下发当前通道的波控码文件（异步）
  *
  * 文件路径 = waveCodeLineEdit路径 / 当前通道名称
  * 例如：d:\CS01HR\模块1组件1通道1
  *
- * 通过信号 waveCodeDownloadRequested 将文件路径传递给 AntennaDeviceWindow 处理。
+ * 通过信号 waveCodeDownloadRequested 将文件路径传递给 AntennaDeviceWindow，
+ * AntennaDeviceWindow 异步分页发送，完成后通过 waveCodeDownloadCompleted 信号
+ * 通知本窗口继续推进到 WaitAfterWaveCode。
  */
 void AutoTestWindow::doDownloadWaveCode()
 {
@@ -410,12 +412,32 @@ void AutoTestWindow::doDownloadWaveCode()
 
     appendResult(QString("  [步骤] 下发波控码: %1").arg(fullPath));
 
-    // 发出信号，由 AntennaDeviceWindow 或 MainWindow 转发处理实际下发逻辑
+    // 发出请求信号（AntennaDeviceWindow 接收后开始异步分页发送）
     emit waveCodeDownloadRequested(fullPath);
 
-    // 波控码下发是异步操作（AntennaDeviceWindow 内部分页发送），这里等待后继续
-    // 注意：实际波控码下发的耗时取决于数据量，此处假设外部已完成
-    scheduleNextStep(TestStep::WaitAfterWaveCode, 200);  // 给足波控码下发时间
+    // ★ 不再固定等待 ★ 状态机停在 DownloadWaveCode，
+    // 等待 onWaveCodeDownloadCompleted 信号到达后再推进
+}
+
+/**
+ * @brief 波控码异步下发完成回调
+ *
+ * 由 AntennaDeviceWindow::waveCodeDownloadCompleted 信号触发。
+ * 收到后推进状态机到 WaitAfterWaveCode → StartPrf。
+ */
+void AutoTestWindow::onWaveCodeDownloadCompleted(bool ok, int totalPages)
+{
+    if (!m_testing || m_currentStep != TestStep::DownloadWaveCode) {
+        return;  // 不在测试流程中，忽略
+    }
+
+    if (ok) {
+        appendResult(QString("  [完成] 波控码下发完毕 (%1 页)").arg(totalPages));
+        scheduleNextStep(TestStep::WaitAfterWaveCode, 50);
+    } else {
+        appendResult("[错误] 波控码下发失败！");
+        stopAutoTestFlow();
+    }
 }
 
 /**
