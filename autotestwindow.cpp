@@ -396,8 +396,15 @@ void AutoTestWindow::doDownloadWaveCode()
         return;
     }
 
-    // 构造完整路径：根目录/通道名
-    QString fullPath = QDir(m_waveDirPath).filePath(m_currentChannelName);
+    // 构造完整路径：根目录 / 通道名
+    // 配置表中的通道名可能含反斜杠（如 "CS01HR\模块1组件1通道1"），
+    // 这是文件名的一部分，必须保留原样。
+    // 用 QDir::cleanPath 确保根目录部分以分隔符结尾，然后直接拼文件名。
+    QString dirPart = QDir::cleanPath(m_waveDirPath);
+    if (!dirPart.endsWith('/') && !dirPart.endsWith('\\')) {
+        dirPart += '/';
+    }
+    QString fullPath = dirPart + m_currentChannelName;
 
     // 检查文件是否存在
     if (!QFile::exists(fullPath)) {
