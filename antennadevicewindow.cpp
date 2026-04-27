@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QtMath>
+#include <QTimer>
 
 AntennaDeviceWindow::AntennaDeviceWindow(QWidget *parent)
     : QWidget(parent)

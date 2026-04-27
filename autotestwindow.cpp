@@ -20,6 +20,7 @@ AutoTestWindow::AutoTestWindow(QWidget *parent)
     , m_powerOn(false)
     , m_testing(false)
     , m_currentChannelIndex(0)
+    , m_vnaFilePath()
 {
     ui->setupUi(this);
     ui->statusIconLabel->setPixmap(QPixmap(":/pic/redLED.png"));
@@ -201,7 +202,7 @@ void AutoTestWindow::startAutoTestFlow()
     updateTestStatus(true);
     ui->startAutoTestButton->setEnabled(false);
 
-    appendResult("=" .repeated(60));
+    appendResult(QString("=").repeated(60));
     appendResult(QString("[%1] ===== 自动测试流程开始 =====")
                  .arg(QDateTime::currentDateTime().toString("hh:mm:ss")));
 
@@ -225,7 +226,7 @@ void AutoTestWindow::stopAutoTestFlow()
 
     appendResult(QString("[%1] ===== 自动测试流程停止 =====")
                  .arg(QDateTime::currentDateTime().toString("hh:mm:ss")));
-    appendResult("=" .repeated(60));
+    appendResult(QString("=").repeated(60));
 }
 
 /**
@@ -310,10 +311,10 @@ void AutoTestWindow::executeCurrentStep()
         updateTestStatus(false);
         updateStartButtonState();
         appendResult("");
-        appendResult(QString("[%1] ===== 自动测试流程全部完成 (%2 个通道) =====")
-                     .arg(QDateTime::currentDateTime().toString("hh:mm:ss"))
-                     .arg(m_channelList.size()));
-        appendResult("=" .repeated(60));
+    appendResult(QString("[%1] ===== 自动测试流程全部完成 (%2 个通道) =====")
+                 .arg(QDateTime::currentDateTime().toString("hh:mm:ss"))
+                 .arg(m_channelList.size()));
+    appendResult(QString("=").repeated(60));
         break;
     }
 }
@@ -530,7 +531,7 @@ void AutoTestWindow::doVnaSaveScreen()
 
     emit vnaScpiCommandRequested(
         QString(":HCOPy:FILE '%1/%2/%3'\n")
-        .arg(ui->vnaFilePathLineEdit->text().trimmed())
+        .arg(m_vnaFilePath.isEmpty() ? "." : m_vnaFilePath)
         .arg(currentTime)
         .arg(screenFileName));
 

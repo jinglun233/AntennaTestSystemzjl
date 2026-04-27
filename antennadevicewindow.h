@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QTableWidgetItem>
 #include <QVector>
+#include <QTimer>
 
 namespace Ui {
 class antennadevicewindow;
@@ -47,10 +48,6 @@ signals:
      * @param totalPages 总页数
      */
     void waveCodeDownloadCompleted(bool ok, int totalPages);
-
-public:
-    void antennaPowerOn();   // 天线加电（供外部调用）
-    void antennaPowerOff();  // 天线断电（供外部调用）
 
 private slots:
     void on_antennaPowerOnButton_clicked();

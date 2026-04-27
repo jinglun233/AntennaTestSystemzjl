@@ -60,6 +60,7 @@ signals:
 public slots:
     void onConnected();     // 矢网连接成功回调
     void onDisconnected();  // 矢网断开回调
+    void onWaveCodeDownloadCompleted(bool ok, int totalPages);  // 波控码下发完成回调
 
 private slots:
     // UI 控件槽函数
@@ -72,9 +73,6 @@ private slots:
 
     // ★★★ 测试流程状态机驱动 ★★★
     void onTestStepTimer();          // 定时器回调：执行下一步
-
-    // 波控码异步下发完成回调（由 AntennaDeviceWindow::waveCodeDownloadCompleted 触发）
-    void onWaveCodeDownloadCompleted(bool ok, int totalPages);
 
 private:
     // ========== UI 辅助 ==========
@@ -129,6 +127,7 @@ private:
     bool m_connected;                     // 矢网是否已连接
     bool m_powerOn;                       // 天线是否已加电
     bool m_testing;                       // 是否正在测试中
+    QString m_vnaFilePath;                // 矢网文件保存路径（待UI控件绑定）
 };
 
 #endif // AUTOTESTWINDOW_H
