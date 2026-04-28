@@ -27,13 +27,17 @@ NetworkManager::NetworkManager(QObject *parent)
     , m_instruSocket(nullptr)
     , m_logFile(nullptr)
     , m_logFileOpened(false)
+    , m_commandLogFile(nullptr)
+    , m_commandLogOpened(false)
 {
     // 初始化接收数据日志文件：D:\yyyyMMdd_Log.txt，每天自动轮转
     openLogForToday();
+    // 初始化指令发送日志文件：D:\yyyyMMdd_LogCommand.txt，每天自动轮转
+    openCommandLogForToday();
 }
 
 /**
- * @brief 打开/切换到当天的日志文件
+ * @brief 打开/切换到当天的接收日志文件
  */
 void NetworkManager::openLogForToday()
 {
@@ -60,6 +64,37 @@ void NetworkManager::openLogForToday()
     }
 }
 
+/**
+ * @brief 打开/切换到当天的指令发送日志文件
+ *
+ * 文件路径：D:\yyyyMMdd_LogCommand.txt
+ * 每天自动轮转，与接收数据日志独立。
+ */
+void NetworkManager::openCommandLogForToday()
+{
+    // 关闭旧文件（如果有）
+    if (m_commandLogFile && m_commandLogOpened) {
+        m_commandLogFile->close();
+        m_commandLogOpened = false;
+    }
+
+    QString today = QDateTime::currentDateTime().toString("yyyy-MM-dd");
+    QString logPath = QString("D:/%1_LogCommand.txt").arg(today);
+
+    if (!m_commandLogFile) {
+        m_commandLogFile = new QFile(this);
+    }
+    m_commandLogFile->setFileName(logPath);
+
+    if (m_commandLogFile->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        m_commandLogDate = today;
+        m_commandLogOpened = true;
+        emit logMessage(QString("[日志] 指令发送记录已开启: %1").arg(logPath));
+    } else {
+        emit logMessage(QString("[日志] 无法打开指令日志文件: %1").arg(logPath));
+    }
+}
+
 NetworkManager::~NetworkManager()
 {
     stopServer();
@@ -69,6 +104,10 @@ NetworkManager::~NetworkManager()
     if (m_logFile && m_logFileOpened) {
         m_logFile->close();
         m_logFileOpened = false;
+    }
+    if (m_commandLogFile && m_commandLogOpened) {
+        m_commandLogFile->close();
+        m_commandLogOpened = false;
     }
 }
 
@@ -247,6 +286,8 @@ bool NetworkManager::sendToServer(const QByteArray &data)
     }
     qint64 sent = m_clientSocket->write(data);
     m_clientSocket->flush();
+    // 记录指令发送日志（天线地检 → 外部服务器）
+    logSentData(data, "天线地检");
     return sent == data.size();
 }
 
@@ -258,6 +299,8 @@ bool NetworkManager::sendToInstru(const QByteArray &data)
     }
     qint64 sent = m_instruSocket->write(data);
     m_instruSocket->flush();
+    // 记录指令发送日志（→ 仪器）
+    logSentData(data, "仪器");
     return sent == data.size();
 }
 
@@ -270,6 +313,8 @@ bool NetworkManager::sendToClient(int clientId, const QByteArray &data)
     }
     qint64 sent = sock->write(data);
     sock->flush();
+    // 记录指令发送日志（服务端 → 电子设备）
+    logSentData(data, "电子设备");
     return sent == data.size();
 }
 
@@ -282,6 +327,8 @@ void NetworkManager::broadcastToClients(const QByteArray &data)
             sock->flush();
         }
     }
+    // 记录指令发送日志（广播 → 电子设备）
+    logSentData(data, "电子设备");
 }
 
 // ============================================================================
@@ -511,6 +558,45 @@ void NetworkManager::logReceivedData(const QByteArray &data, const QString &type
 
     QTextStream stream(m_logFile);
     stream << timestamp << " " << typeLabel << " 接收" << "\n"
+           << hexString << "\n";
+    stream.flush();
+}
+
+// ============================================================================
+//                         指令发送日志
+// ============================================================================
+
+/**
+ * @brief 记录发送的指令数据到 D:\yyyyMMdd_LogCommand.txt
+ *
+ * 格式示例：
+ *   2024/5/27 14:48:03 天线地检 发送
+ *   eb 90 02 c0 05
+ */
+void NetworkManager::logSentData(const QByteArray &data, const QString &typeLabel)
+{
+    if (data.isEmpty()) return;
+
+    // 检查日期是否变更，自动轮转到新日志文件
+    QString today = QDateTime::currentDateTime().toString("yyyy-MM-dd");
+    if (today != m_commandLogDate) {
+        openCommandLogForToday();
+    }
+
+    if (!m_commandLogFile || !m_commandLogOpened) return;
+
+    // 时间戳格式: 2024/5/27 14:48:03 天线地检 发送
+    QString timestamp = QDateTime::currentDateTime().toString("yyyy/M/d hh:mm:ss");
+
+    // 将字节数据转为十六进制空格分隔字符串
+    QStringList hexParts;
+    for (int i = 0; i < data.size(); ++i) {
+        hexParts.append(QString("%1").arg((unsigned char)data[i], 2, 16, QChar('0')));
+    }
+    QString hexString = hexParts.join(" ");
+
+    QTextStream stream(m_commandLogFile);
+    stream << timestamp << " " << typeLabel << " 发送" << "\n"
            << hexString << "\n";
     stream.flush();
 }

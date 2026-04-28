@@ -127,7 +127,11 @@ private:
 
     // 接收数据日志
     void logReceivedData(const QByteArray &data, const QString &typeLabel);
-    void openLogForToday();                              // 打开/切换当日日志文件
+    void openLogForToday();                              // 打开/切换当日接收日志文件
+
+    // 指令发送日志（与接收日志独立文件）
+    void logSentData(const QByteArray &data, const QString &typeLabel);
+    void openCommandLogForToday();                        // 打开/切换当日发送日志文件
 
     // 服务器
     QTcpServer *m_tcpServer;
@@ -144,9 +148,16 @@ private:
 
     // 仪器
     QTcpSocket *m_instruSocket;
+
+    // ========== 接收数据日志 ==========
     QFile *m_logFile;              // 接收数据日志文件
     bool m_logFileOpened;          // 日志文件是否已打开
-    QString m_logDate;             // 当前日志文件的日期（用于每日轮转）
+    QString m_logDate;             // 当前接收日志文件的日期（用于每日轮转）
+
+    // ========== 指令发送日志 ==========
+    QFile *m_commandLogFile;       // 指令发送日志文件
+    bool m_commandLogOpened;       // 发送日志是否已打开
+    QString m_commandLogDate;      // 当前发送日志文件的日期（用于每日轮转）
 };
 
 #endif // NETWORKMANAGER_H
