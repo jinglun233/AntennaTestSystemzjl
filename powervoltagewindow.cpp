@@ -1,32 +1,26 @@
 #include "powervoltagewindow.h"
 #include "ui_powervoltagewindow.h"
 
-#include <QDesktopServices>
-#include <QUrl>
-#include <QMessageBox>
+#include <QAxWidget>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QMessageBox>
+#include <QUrl>
+#include <QDesktopServices>
+
+// IE WebBrowser 控件 CLSID
+static const QString WEB_BROWSER_CLSID =
+    QStringLiteral("{8856F961-340A-11D0-A96B-00C04FD705A2}");
 
 PowerVoltageWindow::PowerVoltageWindow(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PowerVoltageWindow)
+    ui(new Ui::PowerVoltageWindow),
+    m_browser(nullptr),
+    m_urlEdit(nullptr)
 {
     ui->setupUi(this);
-
-    // 添加地址栏和打开按钮（在浏览器容器布局内）
-    QLineEdit *urlEdit = new QLineEdit("https://www.google.com");
-    urlEdit->setPlaceholderText("输入网址，回车或点击按钮打开");
-    QPushButton *openBtn = new QPushButton("打开浏览器");
-    openBtn->setMinimumHeight(30);
-    connect(openBtn, &QPushButton::clicked, this, &PowerVoltageWindow::on_openBrowserButton_clicked);
-    connect(urlEdit, &QLineEdit::returnPressed, this, &PowerVoltageWindow::on_openBrowserButton_clicked);
-
-    QHBoxLayout *toolbarLayout = new QHBoxLayout();
-    toolbarLayout->setSpacing(6);
-    toolbarLayout->addWidget(urlEdit);
-    toolbarLayout->addWidget(openBtn);
-    ui->browserLayout->insertLayout(0, toolbarLayout);
+    initBrowser();
 }
 
 PowerVoltageWindow::~PowerVoltageWindow()
@@ -35,25 +29,81 @@ PowerVoltageWindow::~PowerVoltageWindow()
 }
 
 /**
- * @brief 点击按钮/回车 → 调用系统默认浏览器打开网页
+ * @brief 初始化嵌入浏览器（IE/Edge ActiveX 控件）
+ *
+ * 使用 Qt ActiveX 容器 (axcontainer) 模块嵌入 Windows 的
+ * Internet Explorer 浏览器引擎，无需 webenginewidgets 模块。
  */
-void PowerVoltageWindow::on_openBrowserButton_clicked()
+void PowerVoltageWindow::initBrowser()
 {
-    QLineEdit *urlEdit = findChild<QLineEdit*>();
-    QString url = urlEdit ? urlEdit->text().trimmed() : "https://www.google.com";
+    // 1) 创建地址栏
+    m_urlEdit = new QLineEdit("https://www.google.com");
+    m_urlEdit->setPlaceholderText("输入网址，回车或点击按钮导航");
+    m_urlEdit->setMinimumHeight(28);
 
+    // 2) 创建导航按钮
+    QPushButton *navigateBtn = new QPushButton("导航");
+    navigateBtn->setMinimumHeight(28);
+    connect(navigateBtn, &QPushButton::clicked,
+            this, &PowerVoltageWindow::on_navigateButton_clicked);
+    connect(m_urlEdit, &QLineEdit::returnPressed,
+            this, &PowerVoltageWindow::on_navigateButton_clicked);
+
+    // 3) 工具栏布局（地址栏 + 按钮）
+    QHBoxLayout *toolbarLayout = new QHBoxLayout();
+    toolbarLayout->setSpacing(6);
+    toolbarLayout->setContentsMargins(4, 4, 4, 4);
+    toolbarLayout->addWidget(m_urlEdit);
+    toolbarLayout->addWidget(navigateBtn);
+
+    // 4) 创建嵌入式浏览器控件（IE ActiveX）
+    m_browser = new QAxWidget(this);
+    if (!m_browser->setControl(WEB_BROWSER_CLSID)) {
+        QMessageBox::warning(this, "警告",
+            "无法创建浏览器控件，请确保系统已安装 Internet Explorer。\n"
+            "将使用系统浏览器作为备选方案。");
+        delete m_browser;
+        m_browser = nullptr;
+    }
+
+    // 5) 组装布局：工具栏在上面，浏览器在下面
+    ui->browserLayout->addLayout(toolbarLayout);
+    if (m_browser) {
+        // 浏览器占满剩余空间
+        ui->browserLayout->addWidget(m_browser, 1);   // stretch=1
+
+        // 加载默认页面
+        on_navigateButton_clicked();
+    }
+}
+
+/**
+ * @brief 导航按钮/回车 → 在嵌入式浏览器中打开网址
+ */
+void PowerVoltageWindow::on_navigateButton_clicked()
+{
+    if (!m_browser) {
+        // 备选方案：调用系统浏览器
+        QString url = m_urlEdit ? m_urlEdit->text().trimmed() : "";
+        if (!url.isEmpty()) {
+            QDesktopServices::openUrl(QUrl(url));
+        }
+        return;
+    }
+
+    QString url = m_urlEdit ? m_urlEdit->text().trimmed() : "";
     if (url.isEmpty()) {
         QMessageBox::warning(this, "提示", "请输入网址！");
         return;
     }
 
-    if (!QUrl(url).isValid()) {
-        QMessageBox::warning(this, "提示", "网址格式无效！");
-        return;
+    // 自动补全协议前缀
+    if (!url.startsWith("http://", Qt::CaseInsensitive) &&
+        !url.startsWith("https://", Qt::CaseInsensitive)) {
+        url.prepend("https://");
+        if (m_urlEdit) m_urlEdit->setText(url);
     }
 
-    bool ok = QDesktopServices::openUrl(QUrl(url));
-    if (!ok) {
-        QMessageBox::warning(this, "错误", "无法打开浏览器，请检查系统默认浏览器设置。");
-    }
+    // 通过 IE 的 Navigate 方法加载网页
+    m_browser->dynamicCall("Navigate(const QString&)", url);
 }

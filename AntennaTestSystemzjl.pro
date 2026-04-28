@@ -1,4 +1,4 @@
-QT       += core gui network printsupport
+QT       += core gui network printsupport axcontainer
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
