@@ -74,8 +74,8 @@ void PowerVoltageWindow::setIEEmulationMode()
  */
 void PowerVoltageWindow::initBrowser()
 {
-    // 1) 创建地址栏（默认百度，兼容性更好）
-    m_urlEdit = new QLineEdit("https://www.baidu.com");
+    // 1) 创建地址栏（默认Bing国际版，对IE11兼容性最好）
+    m_urlEdit = new QLineEdit("https://www.bing.com");
     m_urlEdit->setPlaceholderText("输入网址，回车或点击按钮导航");
     m_urlEdit->setMinimumHeight(28);
 
@@ -103,8 +103,10 @@ void PowerVoltageWindow::initBrowser()
         delete m_browser;
         m_browser = nullptr;
     } else {
-        // 禁止弹出脚本错误对话框
-        m_browser->dynamicCall("Silent = true");
+        // 禁止弹出脚本错误对话框（使用 setProperty 比 dynamicCall 更可靠）
+        m_browser->setProperty("Silent", true);
+        // 双重保险：通过 dynamicCall 再设一次
+        m_browser->dynamicCall("setSilent(bool)", true);
     }
 
     // 5) 组装布局：工具栏在上面，浏览器在下面
@@ -144,6 +146,9 @@ void PowerVoltageWindow::on_navigateButton_clicked()
         url.prepend("https://");
         if (m_urlEdit) m_urlEdit->setText(url);
     }
+
+    // 每次导航前重新设置 Silent（防止页面重置属性）
+    m_browser->setProperty("Silent", true);
 
     // 通过 IE 的 Navigate 方法加载网页
     m_browser->dynamicCall("Navigate(const QString&)", url);
