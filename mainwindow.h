@@ -95,6 +95,9 @@ private slots:
     void onStartServerClicked();
     void onStopServerClicked();
 
+protected:
+    void closeEvent(QCloseEvent *event) override;  // 关闭主窗口时清理所有子窗口
+
     // 原始控制指令发送（来自子窗口信号）
     void onSendRawCommand(const QByteArray &command);
     // 周期性指令定时器回调（1s）

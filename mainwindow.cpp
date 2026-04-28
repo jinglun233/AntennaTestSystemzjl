@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QHostAddress>
 #include <QTextCursor>
+#include <QCloseEvent>
 #include <memory>
 
 // ============================================================================
@@ -168,6 +169,49 @@ MainWindow::~MainWindow()
 
     // NetworkManager 的析构会自动清理所有 socket（因为它有 parent = this）
     delete ui;
+}
+
+/**
+ * @brief 关闭主窗口事件 — 确保所有子窗口跟随关闭
+ *
+ * 1. 停止所有定时器
+ * 2. 断开网络连接（服务器/客户端/仪器）
+ * 3. 关闭 AutoTestWindow 弹窗
+ * 4. Tab 页面随 MainWindow 析构自动销毁（parent = this）
+ */
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event)
+
+    // 1) 停止定时器
+    if (m_periodicCommandTimer && m_periodicCommandTimer->isActive()) {
+        m_periodicCommandTimer->stop();
+    }
+    if (m_dateTimeTimer && m_dateTimeTimer->isActive()) {
+        m_dateTimeTimer->stop();
+    }
+
+    // 2) 停止网络服务
+    if (m_network) {
+        if (m_network->isServerRunning()) {
+            m_network->stopServer();
+        }
+        if (m_network->isClientConnected()) {
+            m_network->disconnectFromServer();
+        }
+        if (m_network->isInstruConnected()) {
+            m_network->disconnectFromInstru();
+        }
+    }
+
+    // 3) 关闭 AutoTestWindow 弹窗
+    if (m_autoTestWindow) {
+        m_autoTestWindow->close();
+        delete m_autoTestWindow;
+        m_autoTestWindow = nullptr;
+    }
+
+    // 4) 接受关闭事件，主窗口销毁时子 Tab 页自动析构（parent=this）
 }
 
 // ============================================================================
