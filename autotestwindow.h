@@ -72,11 +72,11 @@ private slots:
     void on_startAutoTestButton_clicked();
 
     // UI 控件槽函数（仪器控制 Tab）
-    void on_connectInstrumentButton_2_clicked();
-    void on_disconnectInstrumentButton_2_clicked();
-    void on_initInstrumentButton_2_clicked();
-    void on_readParamButton_2_clicked();
-    void on_setParamButton_2_clicked();
+    void on_connectInstrumentButton_clicked();
+    void on_disconnectInstrumentButton_clicked();
+    void on_initInstrumentButton_clicked();
+    void on_readParamButton_clicked();
+    void on_setParamButton_clicked();
 
     // ★★★ 测试流程状态机驱动 ★★★
     void onTestStepTimer();          // 定时器回调：执行下一步

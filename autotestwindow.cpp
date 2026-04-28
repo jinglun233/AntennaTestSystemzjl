@@ -621,12 +621,12 @@ void AutoTestWindow::appendResult(const QString &text)
 
 void AutoTestWindow::appendInstrumentLog(const QString &text)
 {
-    ui->statusPlainTextEdit_2->appendPlainText(text);
+    ui->statusPlainTextEdit->appendPlainText(text);
 }
 
-void AutoTestWindow::on_connectInstrumentButton_2_clicked()
+void AutoTestWindow::on_connectInstrumentButton_clicked()
 {
-    QString visaAddr = ui->visaAddressLineEdit_2->text().trimmed();
+    QString visaAddr = ui->visaAddressLineEdit->text().trimmed();
     if (visaAddr.isEmpty()) {
         QMessageBox::warning(this, "提示", "请填写 VISA 地址！");
         return;
@@ -639,7 +639,7 @@ void AutoTestWindow::on_connectInstrumentButton_2_clicked()
                        .arg(visaAddr));
 }
 
-void AutoTestWindow::on_disconnectInstrumentButton_2_clicked()
+void AutoTestWindow::on_disconnectInstrumentButton_clicked()
 {
     if (!m_instrumentConnected) {
         QMessageBox::information(this, "提示", "仪器未连接");
@@ -651,7 +651,7 @@ void AutoTestWindow::on_disconnectInstrumentButton_2_clicked()
                        .arg(QDateTime::currentDateTime().toString("hh:mm:ss")));
 }
 
-void AutoTestWindow::on_initInstrumentButton_2_clicked()
+void AutoTestWindow::on_initInstrumentButton_clicked()
 {
     if (!m_instrumentConnected) {
         QMessageBox::warning(this, "提示", "请先连接仪器！");
@@ -667,7 +667,7 @@ void AutoTestWindow::on_initInstrumentButton_2_clicked()
                        .arg(QDateTime::currentDateTime().toString("hh:mm:ss")));
 }
 
-void AutoTestWindow::on_readParamButton_2_clicked()
+void AutoTestWindow::on_readParamButton_clicked()
 {
     if (!m_instrumentConnected) {
         QMessageBox::warning(this, "提示", "请先连接仪器！");
@@ -683,16 +683,16 @@ void AutoTestWindow::on_readParamButton_2_clicked()
                        .arg(QDateTime::currentDateTime().toString("hh:mm:ss")));
 }
 
-void AutoTestWindow::on_setParamButton_2_clicked()
+void AutoTestWindow::on_setParamButton_clicked()
 {
     if (!m_instrumentConnected) {
         QMessageBox::warning(this, "提示", "请先连接仪器！");
         return;
     }
 
-    QString freq = ui->centerFreqLineEdit_2->text();
-    QString span = ui->spanLineEdit_2->text();
-    QString power = ui->powerLineEdit_2->text();
+    QString freq = ui->centerFreqLineEdit->text();
+    QString span = ui->spanLineEdit->text();
+    QString power = ui->powerLineEdit->text();
 
     appendInstrumentLog(QString("[%1] 正在设置参数：中心频率=%2 GHz, 扫宽=%3 MHz, 参考功率=%4 dBm")
                        .arg(QDateTime::currentDateTime().toString("hh:mm:ss"))

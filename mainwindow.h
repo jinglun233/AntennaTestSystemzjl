@@ -7,7 +7,7 @@
 #include <QComboBox>
 #include <memory>
 
-// 网络管理层（统一封装 TCP Server / Client / VNA）
+// 网络管理层（统一封装 TCP Server / Client / Instru）
 #include "networkmanager.h"
 
 // 数据收发
@@ -111,9 +111,9 @@ private slots:
     void onMainClientDisconnected();                 // 主界面客户端断开
     void onMainClientDataReceived(const QByteArray &data);
 
-    void onVnaConnected();                           // 矢网连接成功
-    void onVnaDisconnected();                        // 矢网断开
-    void onVnaDataReceived(const QByteArray &data);
+    void onInstruConnected();                        // 仪器连接成功
+    void onInstruDisconnected();                     // 仪器断开
+    void onInstruDataReceived(const QByteArray &data);
 
     void onNetworkError(const QString &error);       // 网络错误
     void onNetworkLog(const QString &msg);           // 网络日志

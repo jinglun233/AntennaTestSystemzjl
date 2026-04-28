@@ -47,13 +47,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_network, &NetworkManager::clientDataReceived,
             this, &MainWindow::onMainClientDataReceived);
 
-    // --- 矢网事件（由 MainWindow 转发到 AutoTestWindow）---
-    connect(m_network, &NetworkManager::vnaConnected,
-            this, &MainWindow::onVnaConnected);
-    connect(m_network, &NetworkManager::vnaDisconnected,
-            this, &MainWindow::onVnaDisconnected);
-    connect(m_network, &NetworkManager::vnaDataReceived,
-            this, &MainWindow::onVnaDataReceived);
+    // --- 仪器事件（由 MainWindow 转发到 AutoTestWindow）---
+    connect(m_network, &NetworkManager::instruConnected,
+            this, &MainWindow::onInstruConnected);
+    connect(m_network, &NetworkManager::instruDisconnected,
+            this, &MainWindow::onInstruDisconnected);
+    connect(m_network, &NetworkManager::instruDataReceived,
+            this, &MainWindow::onInstruDataReceived);
 
     // ========== 周期性指令定时器初始化（1秒周期，不自动启动） ==========
     m_periodicCommandTimer = new QTimer(this);
@@ -468,10 +468,10 @@ void MainWindow::onMainClientDataReceived(const QByteArray &data)
 }
 
 // ============================================================================
-//                   NetworkManager 事件转发 — 矢网仪器
+//                   NetworkManager 事件转发 — 仪器
 // ============================================================================
 
-void MainWindow::onVnaConnected()
+void MainWindow::onInstruConnected()
 {
     // 通知 AutoTestWindow 连接已成功
     if (m_autoTestWindow) {
@@ -479,7 +479,7 @@ void MainWindow::onVnaConnected()
     }
 }
 
-void MainWindow::onVnaDisconnected()
+void MainWindow::onInstruDisconnected()
 {
     // 通知 AutoTestWindow 连接已断开
     if (m_autoTestWindow) {
@@ -487,10 +487,10 @@ void MainWindow::onVnaDisconnected()
     }
 }
 
-void MainWindow::onVnaDataReceived(const QByteArray &data)
+void MainWindow::onInstruDataReceived(const QByteArray &data)
 {
-    // TODO: 处理矢网仪器返回数据
-    appendLog(QString("[矢网←] %1 字节").arg(data.size()));
+    // TODO: 处理仪器返回数据
+    appendLog(QString("[仪器←] %1 字节").arg(data.size()));
 }
 
 void MainWindow::onNetworkError(const QString &error)
@@ -734,29 +734,29 @@ void MainWindow::onActionAutoTestWindow()
         connect(m_autoTestWindow, &AutoTestWindow::stopPrfRequested,
                 m_antennaDeviceWindow, &AntennaDeviceWindow::stopPrf);
 
-        // ★★★ 矢网 SCPI 指令 → NetworkManager::sendToVna（转 ASCII 发送）★★★
+        // ★★★ 仪器 SCPI 指令 → NetworkManager::sendToInstru（转 ASCII 发送）★★★
         connect(m_autoTestWindow, &AutoTestWindow::vnaScpiCommandRequested,
                 this, [this](const QString &scpiCommand) {
-            if (m_network->isVnaConnected()) {
+            if (m_network->isInstruConnected()) {
                 QByteArray data = scpiCommand.toLatin1();
-                m_network->sendToVna(data);
+                m_network->sendToInstru(data);
             } else {
-                appendLog("[ERROR] 矢网未连接，无法发送 SCPI 指令");
+                appendLog("[ERROR] 仪器未连接，无法发送 SCPI 指令");
             }
         });
 
-        // 矢网连接/断开请求转发到 NetworkManager
+        // 仪器连接/断开请求转发到 NetworkManager
         connect(m_autoTestWindow, &AutoTestWindow::connectToHostRequested,
                 this, [this](const QString &ip, quint16 port) {
-            if (!m_network->connectToVna(ip, port)) {
+            if (!m_network->connectToInstru(ip, port)) {
                 QMessageBox::critical(this, "错误",
-                    QString("无法连接到矢网仪器！\n%1").arg("请检查网络设置"));
+                    QString("无法连接到仪器！\n%1").arg("请检查网络设置"));
             }
         });
 
         connect(m_autoTestWindow, &AutoTestWindow::disconnectFromHostRequested,
                 this, [this]() {
-            m_network->disconnectFromVna();
+            m_network->disconnectFromInstru();
         });
     }
     m_autoTestWindow->show();

@@ -1,5 +1,5 @@
 /****************************************************************************
-** 网络管理层 — 统一封装 TCP Server / Client / VNA 三种连接
+** 网络管理层 — 统一封装 TCP Server / Client / Instru 三种连接
 **
 ** 设计原则：
 **   1. MainWindow 只持有 NetworkManager，不直接操作 QTcpSocket
@@ -14,6 +14,7 @@
 #include <QTcpSocket>
 #include <QVector>
 #include <QMap>
+#include <QFile>
 #include <memory>
 
 // 前向声明
@@ -25,7 +26,7 @@ class RingBuffer;
 enum class ConnectionType {
     ServerClient,   // 服务器接受的客户端
     Client,         // 主界面客户端模式（主动连接外部服务器）
-    Vna             // 矢网仪器连接
+    Instru          // 仪器连接
 };
 
 /**
@@ -49,7 +50,7 @@ struct ConnectionHandle {
  * 统一管理三种 TCP 连接：
  *   - 服务器模式：监听端口，接受多个客户端
  *   - 客户端模式：主动连接外部服务器（主界面使用）
- *   - 矢网模式：连接矢网仪器（AutoTestWindow 使用）
+ *   - 仪器模式：连接仪器（AutoTestWindow 使用）
  */
 class NetworkManager : public QObject
 {
@@ -70,20 +71,20 @@ public:
     void disconnectFromServer();
     bool isClientConnected() const;
 
-    // ========== 矢网仪器模式 ==========
-    bool connectToVna(const QString &ip, quint16 port);
-    void disconnectFromVna();
-    bool isVnaConnected() const;
+    // ========== 仪器模式 ==========
+    bool connectToInstru(const QString &ip, quint16 port);
+    void disconnectFromInstru();
+    bool isInstruConnected() const;
 
     // ========== 数据发送 ==========
     bool sendToServer(const QByteArray &data);
-    bool sendToVna(const QByteArray &data);
+    bool sendToInstru(const QByteArray &data);
     bool sendToClient(int clientId, const QByteArray &data);
     void broadcastToClients(const QByteArray &data);
 
     // ========== 查询 ==========
     ConnectionHandle clientHandle() const;   // 客户端模式连接信息
-    ConnectionHandle vnaHandle() const;      // 矢网连接信息
+    ConnectionHandle instruHandle() const;   // 仪器连接信息
 
 signals:
     // 服务器事件
@@ -96,10 +97,10 @@ signals:
     void clientDisconnected();
     void clientDataReceived(const QByteArray &data);
 
-    // 矢网事件
-    void vnaConnected();
-    void vnaDisconnected();
-    void vnaDataReceived(const QByteArray &data);
+    // 仪器事件
+    void instruConnected();
+    void instruDisconnected();
+    void instruDataReceived(const QByteArray &data);
 
     // 通用错误
     void errorOccurred(const QString &error);
@@ -115,14 +116,18 @@ private slots:
     void onClientSocketReadyRead();
     void onClientSocketDisconnected();
 
-    void onVnaSocketReadyRead();
-    void onVnaSocketDisconnected();
+    void onInstruSocketReadyRead();
+    void onInstruSocketDisconnected();
 
 private:
     // 内部辅助
     void setupSocketConnections(QTcpSocket *socket, ConnectionType type);
     void cleanupSocket(QTcpSocket *socket);
     QString peerInfo(QTcpSocket *socket) const;
+
+    // 接收数据日志
+    void logReceivedData(const QByteArray &data, const QString &typeLabel);
+    void openLogForToday();                              // 打开/切换当日日志文件
 
     // 服务器
     QTcpServer *m_tcpServer;
@@ -137,8 +142,11 @@ private:
     QTcpSocket *m_clientSocket;
     std::shared_ptr<RingBuffer> m_clientBuffer;
 
-    // 矢网
-    QTcpSocket *m_vnaSocket;
+    // 仪器
+    QTcpSocket *m_instruSocket;
+    QFile *m_logFile;              // 接收数据日志文件
+    bool m_logFileOpened;          // 日志文件是否已打开
+    QString m_logDate;             // 当前日志文件的日期（用于每日轮转）
 };
 
 #endif // NETWORKMANAGER_H

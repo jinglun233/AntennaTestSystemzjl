@@ -2,14 +2,17 @@
 ** 网络管理层实现
 **
 ** 职责：
-**   1. 封装 TCP Server / Client / VNA 三种连接的生命周期
+**   1. 封装 TCP Server / Client / Instru 三种连接的生命周期
 **   2. 为每个连接维护独立的 RingBuffer
 **   3. 通过信号向外部报告连接状态和数据
+**   4. 记录所有接收到的原始数据到 D:\时间_Log.txt
 ****************************************************************************/
 #include "networkmanager.h"
 #include "ringbuffer.h"
 #include <QHostAddress>
 #include <QDateTime>
+#include <QDir>
+#include <QTextStream>
 
 // ============================================================================
 //                              构造 / 析构
@@ -21,15 +24,52 @@ NetworkManager::NetworkManager(QObject *parent)
     , m_nextClientId(1)
     , m_maxClients(0)
     , m_clientSocket(nullptr)
-    , m_vnaSocket(nullptr)
+    , m_instruSocket(nullptr)
+    , m_logFile(nullptr)
+    , m_logFileOpened(false)
 {
+    // 初始化接收数据日志文件：D:\yyyyMMdd_Log.txt，每天自动轮转
+    openLogForToday();
+}
+
+/**
+ * @brief 打开/切换到当天的日志文件
+ */
+void NetworkManager::openLogForToday()
+{
+    // 关闭旧文件（如果有）
+    if (m_logFile && m_logFileOpened) {
+        m_logFile->close();
+        m_logFileOpened = false;
+    }
+
+    QString today = QDateTime::currentDateTime().toString("yyyy-MM-dd");
+    QString logPath = QString("D:/%1_Log.txt").arg(today);
+
+    if (!m_logFile) {
+        m_logFile = new QFile(this);
+    }
+    m_logFile->setFileName(logPath);
+
+    if (m_logFile->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        m_logDate = today;
+        m_logFileOpened = true;
+        emit logMessage(QString("[日志] 接收数据记录已开启: %1").arg(logPath));
+    } else {
+        emit logMessage(QString("[日志] 无法打开日志文件: %1").arg(logPath));
+    }
 }
 
 NetworkManager::~NetworkManager()
 {
     stopServer();
     disconnectFromServer();
-    disconnectFromVna();
+    disconnectFromInstru();
+
+    if (m_logFile && m_logFileOpened) {
+        m_logFile->close();
+        m_logFileOpened = false;
+    }
 }
 
 // ============================================================================
@@ -150,49 +190,49 @@ bool NetworkManager::isClientConnected() const
 }
 
 // ============================================================================
-//                         矢网仪器模式（AutoTestWindow 使用）
+//                         仪器模式（AutoTestWindow 使用）
 // ============================================================================
 
-bool NetworkManager::connectToVna(const QString &ip, quint16 port)
+bool NetworkManager::connectToInstru(const QString &ip, quint16 port)
 {
-    if (m_vnaSocket) {
-        emit errorOccurred("矢网已连接，请先断开");
+    if (m_instruSocket) {
+        emit errorOccurred("仪器已连接，请先断开");
         return false;
     }
 
-    m_vnaSocket = new QTcpSocket(this);
-    connect(m_vnaSocket, &QTcpSocket::readyRead,
-            this, &NetworkManager::onVnaSocketReadyRead);
-    connect(m_vnaSocket, &QTcpSocket::disconnected,
-            this, &NetworkManager::onVnaSocketDisconnected);
+    m_instruSocket = new QTcpSocket(this);
+    connect(m_instruSocket, &QTcpSocket::readyRead,
+            this, &NetworkManager::onInstruSocketReadyRead);
+    connect(m_instruSocket, &QTcpSocket::disconnected,
+            this, &NetworkManager::onInstruSocketDisconnected);
 
-    m_vnaSocket->connectToHost(QHostAddress(ip), port);
-    if (!m_vnaSocket->waitForConnected(3000)) {
-        emit errorOccurred(QString("连接矢网失败: %1").arg(m_vnaSocket->errorString()));
-        cleanupSocket(m_vnaSocket);
-        m_vnaSocket = nullptr;
+    m_instruSocket->connectToHost(QHostAddress(ip), port);
+    if (!m_instruSocket->waitForConnected(3000)) {
+        emit errorOccurred(QString("连接仪器失败: %1").arg(m_instruSocket->errorString()));
+        cleanupSocket(m_instruSocket);
+        m_instruSocket = nullptr;
         return false;
     }
 
-    emit vnaConnected();
-    emit logMessage(QString("[网络] 已连接到矢网 %1:%2").arg(ip).arg(port));
+    emit instruConnected();
+    emit logMessage(QString("[网络] 已连接到仪器 %1:%2").arg(ip).arg(port));
     return true;
 }
 
-void NetworkManager::disconnectFromVna()
+void NetworkManager::disconnectFromInstru()
 {
-    if (!m_vnaSocket) return;
+    if (!m_instruSocket) return;
 
-    cleanupSocket(m_vnaSocket);
-    m_vnaSocket = nullptr;
+    cleanupSocket(m_instruSocket);
+    m_instruSocket = nullptr;
 
-    emit vnaDisconnected();
-    emit logMessage("[网络] 已与矢网断开");
+    emit instruDisconnected();
+    emit logMessage("[网络] 已与仪器断开");
 }
 
-bool NetworkManager::isVnaConnected() const
+bool NetworkManager::isInstruConnected() const
 {
-    return m_vnaSocket && m_vnaSocket->state() == QTcpSocket::ConnectedState;
+    return m_instruSocket && m_instruSocket->state() == QTcpSocket::ConnectedState;
 }
 
 // ============================================================================
@@ -210,14 +250,14 @@ bool NetworkManager::sendToServer(const QByteArray &data)
     return sent == data.size();
 }
 
-bool NetworkManager::sendToVna(const QByteArray &data)
+bool NetworkManager::sendToInstru(const QByteArray &data)
 {
-    if (!isVnaConnected()) {
-        emit errorOccurred("矢网未连接，无法发送");
+    if (!isInstruConnected()) {
+        emit errorOccurred("仪器未连接，无法发送");
         return false;
     }
-    qint64 sent = m_vnaSocket->write(data);
-    m_vnaSocket->flush();
+    qint64 sent = m_instruSocket->write(data);
+    m_instruSocket->flush();
     return sent == data.size();
 }
 
@@ -258,13 +298,13 @@ ConnectionHandle NetworkManager::clientHandle() const
     return h;
 }
 
-ConnectionHandle NetworkManager::vnaHandle() const
+ConnectionHandle NetworkManager::instruHandle() const
 {
     ConnectionHandle h;
     h.id = 0;
-    h.type = ConnectionType::Vna;
-    h.peerInfo = m_vnaSocket ? peerInfo(m_vnaSocket) : QString();
-    h.connected = isVnaConnected();
+    h.type = ConnectionType::Instru;
+    h.peerInfo = m_instruSocket ? peerInfo(m_instruSocket) : QString();
+    h.connected = isInstruConnected();
     return h;
 }
 
@@ -342,6 +382,9 @@ void NetworkManager::onServerClientReadyRead()
     auto &buf = m_serverBuffers[sock];
     buf->write(data);
 
+    // 记录接收数据到日志
+    logReceivedData(data, "电子设备");
+
     // TODO: 帧解析逻辑从 RingBuffer 中提取完整帧（保留原有 MainWindow 的解析流程）
     int id = m_clientIds.value(sock, -1);
     ConnectionHandle h;
@@ -364,6 +407,9 @@ void NetworkManager::onClientSocketReadyRead()
     QByteArray data = m_clientSocket->readAll();
     if (data.isEmpty()) return;
 
+    // 记录接收数据到日志
+    logReceivedData(data, "天线地检");
+
     m_clientBuffer->write(data);
     emit clientDataReceived(data);
 }
@@ -382,29 +428,32 @@ void NetworkManager::onClientSocketDisconnected()
 }
 
 // ============================================================================
-//                         私有槽函数 — 矢网
+//                         私有槽函数 — 仪器
 // ============================================================================
 
-void NetworkManager::onVnaSocketReadyRead()
+void NetworkManager::onInstruSocketReadyRead()
 {
-    if (!m_vnaSocket) return;
+    if (!m_instruSocket) return;
 
-    QByteArray data = m_vnaSocket->readAll();
+    QByteArray data = m_instruSocket->readAll();
     if (data.isEmpty()) return;
 
-    emit vnaDataReceived(data);
+    // 记录接收数据到日志
+    logReceivedData(data, "仪器");
+
+    emit instruDataReceived(data);
 }
 
-void NetworkManager::onVnaSocketDisconnected()
+void NetworkManager::onInstruSocketDisconnected()
 {
-    if (!m_vnaSocket) return;
+    if (!m_instruSocket) return;
 
-    emit logMessage(QString("[网络] 矢网连接已断开 %1").arg(peerInfo(m_vnaSocket)));
+    emit logMessage(QString("[网络] 仪器连接已断开 %1").arg(peerInfo(m_instruSocket)));
 
-    cleanupSocket(m_vnaSocket);
-    m_vnaSocket = nullptr;
+    cleanupSocket(m_instruSocket);
+    m_instruSocket = nullptr;
 
-    emit vnaDisconnected();
+    emit instruDisconnected();
 }
 
 // ============================================================================
@@ -425,4 +474,43 @@ QString NetworkManager::peerInfo(QTcpSocket *socket) const
     return QString("%1:%2")
            .arg(socket->peerAddress().toString())
            .arg(socket->peerPort());
+}
+
+// ============================================================================
+//                         接收数据日志
+// ============================================================================
+
+/**
+ * @brief 记录接收到的原始数据到 D:\yyyyMMdd_Log.txt
+ *
+ * 格式示例：
+ *   2024/5/27 14:47:51 服务端 接收
+ *   eb 90 02 c0 05
+ */
+void NetworkManager::logReceivedData(const QByteArray &data, const QString &typeLabel)
+{
+    if (data.isEmpty()) return;
+
+    // 检查日期是否变更，自动轮转到新日志文件
+    QString today = QDateTime::currentDateTime().toString("yyyy-MM-dd");
+    if (today != m_logDate) {
+        openLogForToday();
+    }
+
+    if (!m_logFile || !m_logFileOpened) return;
+
+    // 时间戳格式: 2024/5/27 14:47:51 服务端 接收
+    QString timestamp = QDateTime::currentDateTime().toString("yyyy/M/d hh:mm:ss");
+
+    // 将字节数据转为十六进制空格分隔字符串
+    QStringList hexParts;
+    for (int i = 0; i < data.size(); ++i) {
+        hexParts.append(QString("%1").arg((unsigned char)data[i], 2, 16, QChar('0')));
+    }
+    QString hexString = hexParts.join(" ");
+
+    QTextStream stream(m_logFile);
+    stream << timestamp << " " << typeLabel << " 接收" << "\n"
+           << hexString << "\n";
+    stream.flush();
 }
