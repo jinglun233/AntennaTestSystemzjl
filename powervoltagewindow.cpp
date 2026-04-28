@@ -8,6 +8,9 @@
 #include <QMessageBox>
 #include <QUrl>
 #include <QDesktopServices>
+#include <QSettings>
+#include <QApplication>
+#include <QFileInfo>
 
 // IE WebBrowser 控件 CLSID
 static const QString WEB_BROWSER_CLSID =
@@ -20,12 +23,47 @@ PowerVoltageWindow::PowerVoltageWindow(QWidget *parent) :
     m_urlEdit(nullptr)
 {
     ui->setupUi(this);
+
+    // 强制设置 IE 仿真模式为 IE11（解决默认 IE7 模式不支持 ES6+ 语法的问题）
+    setIEEmulationMode();
+
     initBrowser();
 }
 
 PowerVoltageWindow::~PowerVoltageWindow()
 {
     delete ui;
+}
+
+/**
+ * @brief 设置当前程序的 IE 浏览器仿真模式为 IE11
+ *
+ * 通过注册表 HKEY_CURRENT_USER\Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION
+ * 设置 exe 名对应的值为 11001（IE11 Edge 模式）。
+ * 这样嵌入的 QAxWidget(IE ActiveX) 就会用 IE11 内核渲染，支持现代 JavaScript。
+ */
+void PowerVoltageWindow::setIEEmulationMode()
+{
+    // 获取程序文件名（不含路径）
+    QString appName = QApplication::applicationName();
+    if (appName.isEmpty()) {
+        appName = QFileInfo(QApplication::applicationFilePath()).fileName();
+    }
+    if (appName.endsWith(".exe", Qt::CaseInsensitive)) {
+        appName.chop(4);
+    }
+
+    QSettings settings(
+        QStringLiteral("HKEY_CURRENT_USER\\Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION"),
+        QSettings::NativeFormat
+        );
+
+    // 11001 = IE11 Edge 模式，支持 HTML5/ES6+
+    int emulationValue = settings.value(appName, -1).toInt();
+    if (emulationValue != 11001) {
+        settings.setValue(appName, 11001);
+        settings.sync();
+    }
 }
 
 /**
@@ -36,8 +74,8 @@ PowerVoltageWindow::~PowerVoltageWindow()
  */
 void PowerVoltageWindow::initBrowser()
 {
-    // 1) 创建地址栏
-    m_urlEdit = new QLineEdit("https://www.google.com");
+    // 1) 创建地址栏（默认百度，兼容性更好）
+    m_urlEdit = new QLineEdit("https://www.baidu.com");
     m_urlEdit->setPlaceholderText("输入网址，回车或点击按钮导航");
     m_urlEdit->setMinimumHeight(28);
 
@@ -64,6 +102,9 @@ void PowerVoltageWindow::initBrowser()
             "将使用系统浏览器作为备选方案。");
         delete m_browser;
         m_browser = nullptr;
+    } else {
+        // 禁止弹出脚本错误对话框
+        m_browser->dynamicCall("Silent = true");
     }
 
     // 5) 组装布局：工具栏在上面，浏览器在下面
