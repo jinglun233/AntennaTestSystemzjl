@@ -23,6 +23,9 @@ public:
     void recordDesignSize(QWidget *widget, const QSize &designSize);
     
     void detachCurrentTab();
+    
+    // 关闭所有已分离的独立窗口（供主窗口关闭时调用）
+    void closeAllDetachedWindows();
 
 private slots:
     void handleTabDetached(int index, const QPoint &pos);

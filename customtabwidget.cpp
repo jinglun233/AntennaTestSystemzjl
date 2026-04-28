@@ -77,6 +77,21 @@ void CustomTabWidget::detachCurrentTab()
     handleTabDetached(currentIndex, pos);
 }
 
+void CustomTabWidget::closeAllDetachedWindows()
+{
+    // 复制 key 列表，因为 close() 会触发 eventFilter 修改 m_detachedWindows
+    QList<QWidget*> detached = m_detachedWindows.keys();
+    for (QWidget *w : detached) {
+        // 先移除事件过滤器，避免 close 触发重新插入 tab
+        w->removeEventFilter(this);
+        w->close();
+        w->deleteLater();
+    }
+    m_detachedWindows.clear();
+    m_detachedTitles.clear();
+    m_detachedIcons.clear();
+}
+
 void CustomTabWidget::keyPressEvent(QKeyEvent *event)
 {
     // 检测是否按下了 Tab 键

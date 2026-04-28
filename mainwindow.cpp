@@ -211,6 +211,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
         m_autoTestWindow = nullptr;
     }
 
+    // 3.5) 关闭所有已分离的 Tab 独立窗口
+    ui->telemetryTabWidget->closeAllDetachedWindows();
+
     // 4) 接受关闭事件，主窗口销毁时子 Tab 页自动析构（parent=this）
 }
 
@@ -568,10 +571,9 @@ bool MainWindow::sendFrame(int clientId, quint8 command, const QByteArray &paylo
         if (!ok) appendLog("[发送失败] 目标客户端未连接");
         return ok;
     } else {
-        // 服务端客户端模式 → 通过 NetworkManager 发送
-        bool ok = m_network->sendToClient(clientId, packet);
-        if (!ok) appendLog(QString("[发送失败] 客户端 #%1 未连接").arg(clientId));
-        return ok;
+        // 服务端模式 → 统一广播给所有客户端
+        m_network->broadcastToClients(packet);
+        return true;
     }
 }
 
