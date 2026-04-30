@@ -8,18 +8,21 @@
 #include <memory>
 
 // 网络管理层（统一封装 TCP Server / Client / Instru）
-#include "networkmanager.h"
+#include "network/networkmanager.h"
 
 // 数据收发
-#include "ringbuffer.h"
-#include "dataprotocol.h"
+#include "network/ringbuffer.h"
+// 客户端协议（EB90 标准帧，固定1029字节 —— 用于客户端模式接收服务端数据）
+#include "protocol/clientprotocol.h"
+// 服务端协议（0x68 遥测子帧 —— 用于服务端模式接收客户端上报数据）
+#include "protocol/serverprotocol.h"
 
-// 子窗口
-#include "antennadevicewindow.h"
-#include "electronicdevicewindow.h"
-#include "temperatureinfowindow.h"
-#include "powervoltagewindow.h"
-#include "autotestwindow.h"
+// 设备子窗口
+#include "device/antennadevicewindow.h"
+#include "device/electronicdevicewindow.h"
+#include "device/temperatureinfowindow.h"
+#include "device/powervoltagewindow.h"
+#include "device/autotestwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -31,7 +34,7 @@ QT_END_NAMESPACE
 enum class WorkMode {
     None = 0,           // 未选择模式
     AntennaGroundTest,  // 单独天线地检模式（客户端模式，连接外部服务器）
-    SimulateDevice      // 模拟电子设备模式（服务器+客户端双模式）
+    AutoTest            // 自动测试模式（服务器+客户端双模式，广播发送，不限制连接数）
 };
 
 /**
@@ -59,6 +62,9 @@ private:
     // ========== 时钟相关 ==========
     QTimer *m_dateTimeTimer;
     QLabel *m_timeLabel;
+
+    // ========== 状态栏防护定时器（清除 IE 控件污染的临时消息） ==========
+    QTimer *m_statusBarGuardTimer;   // 高频定时器，清除IE写入状态栏的临时消息
 
     // ========== 周期性指令定时器 ==========
     QTimer *m_periodicCommandTimer;   // 1秒周期定时器
@@ -90,6 +96,7 @@ private:
 
 private slots:
     void updateDateTime();
+    void onStatusBarGuardTimer();     // 定时清除IE控件污染状态栏的临时消息
     void onConfirmModeClicked();
     void onCancelModeClicked();
     void onStartServerClicked();
@@ -149,6 +156,15 @@ private:
     void handleControlAck(int clientId, const DataFrame &frame);
     void handleDeviceStatus(int clientId, const DataFrame &frame);
     void handleErrorReport(int clientId, const DataFrame &frame);
+
+
+    /**
+     * @brief 遥测分发 —— 转发到 ElectronicDeviceWindow 进行 Calc 解码显示
+     *
+     * 由 onServerDataReceived 在 ServerProtocol::resolve() 后调用。
+     * 遥测统一由 ElectronicDeviceWindow 处理。
+     */
+    void updataTelemetryData(const QByteArray &data);
 
     // ========== 内部辅助 ==========
     QString clientPeerLabel(int clientId);

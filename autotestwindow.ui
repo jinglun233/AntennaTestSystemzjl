@@ -16,6 +16,11 @@
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -28,6 +33,11 @@
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QGroupBox" name="networkGroupBox">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="title">
             <string>矢网仪器IP设置</string>
            </property>
@@ -43,6 +53,11 @@
                 <height>30</height>
                </size>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>地址：</string>
               </property>
@@ -56,6 +71,11 @@
                 <height>30</height>
                </size>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>192.168.1.111</string>
               </property>
@@ -68,6 +88,11 @@
                 <width>0</width>
                 <height>30</height>
                </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
               </property>
               <property name="text">
                <string>连接</string>
@@ -87,6 +112,11 @@
                <height>30</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
              <property name="text">
               <string>天线加电</string>
              </property>
@@ -100,6 +130,11 @@
                <height>30</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
              <property name="text">
               <string>天线断电</string>
              </property>
@@ -109,6 +144,11 @@
          </item>
          <item>
           <widget class="QGroupBox" name="waveControlGroupBox">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="title">
             <string>波控码</string>
            </property>
@@ -120,6 +160,11 @@
                 <width>0</width>
                 <height>30</height>
                </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
               </property>
               <property name="placeholderText">
                <string>波控文件路径</string>
@@ -134,6 +179,11 @@
                 <height>30</height>
                </size>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>选择波位文件夹</string>
               </property>
@@ -144,6 +194,11 @@
          </item>
          <item>
           <widget class="QGroupBox" name="configGroupBox">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="title">
             <string>配置文件</string>
            </property>
@@ -156,13 +211,24 @@
                 <height>30</height>
                </size>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>选择配置文件</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QTableWidget" name="configTableWidget"/>
+             <widget class="QTableWidget" name="configTableWidget">
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -183,6 +249,11 @@
                <height>30</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
              <property name="text">
               <string>开始自动测试</string>
              </property>
@@ -190,6 +261,11 @@
            </item>
            <item>
             <spacer name="horizontalSpacer">
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -218,6 +294,11 @@
                <height>24</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
              <property name="text">
               <string/>
              </property>
@@ -234,6 +315,11 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
              <property name="text">
               <string>未连接</string>
              </property>
@@ -245,12 +331,22 @@
        </item>
        <item>
         <widget class="QGroupBox" name="resultGroupBox">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
          <property name="title">
           <string>测试结果</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
            <widget class="QPlainTextEdit" name="resultPlainTextEdit">
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>

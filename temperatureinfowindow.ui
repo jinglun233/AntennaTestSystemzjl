@@ -649,21 +649,29 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="spinBox_selectChannel">
+             <widget class="QLineEdit" name="lineEdit_selectChannel">
               <property name="minimumSize">
                <size>
-                <width>55</width>
+                <width>200</width>
                 <height>22</height>
                </size>
               </property>
-              <property name="specialValueText">
-               <string>全部</string>
+              <property name="maximumSize">
+               <size>
+                <width>250</width>
+                <height>22</height>
+               </size>
               </property>
-              <property name="minimum">
-               <number>0</number>
+              <property name="toolTip">
+               <string>输入要显示的通道号，支持范围和单号组合
+示例: 1-20,25,40 表示显示通道1~20、25、40
+留空或输入 &quot;all&quot; 显示全部112路通道</string>
               </property>
-              <property name="maximum">
-               <number>112</number>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="placeholderText">
+               <string>格式: 1-20,25,40  (范围1-112)</string>
               </property>
              </widget>
             </item>

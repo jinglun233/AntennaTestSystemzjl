@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PowerVoltageWindow</class>
+ <class>powervoltagewindow</class>
  <widget class="QWidget" name="powervoltagewindow">
   <property name="geometry">
    <rect>
@@ -57,14 +57,19 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>28</height>
+            <height>30</height>
            </size>
           </property>
-          <property name="placeholderText">
-           <string>输入网址，回车或点击按钮导航</string>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
           </property>
           <property name="text">
            <string>https://www.bing.com</string>
+          </property>
+          <property name="placeholderText">
+           <string>输入网址，回车或点击按钮导航</string>
           </property>
          </widget>
         </item>
@@ -73,8 +78,13 @@
           <property name="minimumSize">
            <size>
             <width>70</width>
-            <height>28</height>
+            <height>30</height>
            </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
           </property>
           <property name="text">
            <string>导航</string>
@@ -112,14 +122,14 @@
          </property>
          <item>
           <widget class="QLabel" name="placeholderLabel">
+           <property name="styleSheet">
+            <string notr="true">color: #999999; font-size: 14px;</string>
+           </property>
            <property name="text">
             <string>浏览器区域（运行时自动加载）</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color: #999999; font-size: 14px;</string>
            </property>
           </widget>
          </item>

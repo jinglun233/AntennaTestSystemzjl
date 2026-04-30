@@ -63,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
     // ========== 创建设备子窗口（添加 parent，修复内存泄漏） ==========
     m_antennaDeviceWindow = new AntennaDeviceWindow(this);
     electronicTab = new ElectronicDeviceWindow(this);
+    electronicTab->autoLoadDefaultConfigs();       // 启动时自动加载 D:/calc_nom.csv 和 calc_dir.csv
     temperatureTab = new TemperatureInfoWindow(this);
     powerTab = new PowerVoltageWindow(this);
 
@@ -89,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->statusbar->addWidget(m_modeStatusLabel, 1);
 
     ui->statusbar->addWidget([](){
-        QLabel* lab = new QLabel("Copyright @2025 齐鲁空天信息研究院，版权所有 All Rights Reserved");
+        QLabel* lab = new QLabel("Copyright @2026 齐鲁空天信息研究院，版权所有 All Rights Reserved");
         lab->setAlignment(Qt::AlignCenter);
         return lab;
     }(), 1);
@@ -97,6 +98,14 @@ MainWindow::MainWindow(QWidget *parent)
     m_timeLabel = new QLabel(this);
     m_timeLabel->setAlignment(Qt::AlignRight);
     ui->statusbar->addWidget(m_timeLabel, 1);
+
+    // ========== 状态栏防护定时器（清除 IE ActiveX 控件的临时消息） ==========
+    // IE WebBrowser 控件在 Navigate 时会通过 StatusTextChange 事件向主窗口
+    // 状态栏写入 "正在下载数据..." 等消息，覆盖自定义的三段式状态栏内容。
+    // 此定时器以 20ms 周期调用 clearMessage()，立即清除任何临时消息。
+    m_statusBarGuardTimer = new QTimer(this);
+    connect(m_statusBarGuardTimer, &QTimer::timeout, this, &MainWindow::onStatusBarGuardTimer);
+    m_statusBarGuardTimer->start(20);   // 20ms 足够快，用户几乎看不到闪烁
 
     // ========== 时钟定时器 ==========
     m_dateTimeTimer = new QTimer(this);
@@ -166,6 +175,9 @@ MainWindow::~MainWindow()
     if (m_dateTimeTimer) {
         m_dateTimeTimer->stop();
     }
+    if (m_statusBarGuardTimer) {
+        m_statusBarGuardTimer->stop();
+    }
 
     // NetworkManager 的析构会自动清理所有 socket（因为它有 parent = this）
     delete ui;
@@ -189,6 +201,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
     if (m_dateTimeTimer && m_dateTimeTimer->isActive()) {
         m_dateTimeTimer->stop();
+    }
+    if (m_statusBarGuardTimer && m_statusBarGuardTimer->isActive()) {
+        m_statusBarGuardTimer->stop();
     }
 
     // 2) 停止网络服务
@@ -242,10 +257,15 @@ void MainWindow::updateUIState()
         ui->serverGroupBox->setVisible(false);
         ui->clientGroupBox->setVisible(true);
         break;
-    case WorkMode::SimulateDevice:
+    case WorkMode::AutoTest:
         ui->serverGroupBox->setVisible(true);
         ui->clientGroupBox->setVisible(true);
         break;
+    }
+
+    // 电子设备 Tab 页在"单独天线地检模式"下置灰不可用（该模式下无电子设备遥测数据）
+    if (electronicTab) {
+        electronicTab->setEnabled(m_currentMode != WorkMode::AntennaGroundTest);
     }
 
     // 服务器控件状态
@@ -279,8 +299,8 @@ void MainWindow::updateModeStatusLabel()
         text = "当前模式：单独天线地检模式";
         style = "color: #28a745; padding-left: 4px;";
         break;
-    case WorkMode::SimulateDevice:
-        text = "当前模式：模拟电子设备模式";
+    case WorkMode::AutoTest:
+        text = "当前模式：自动测试模式";
         style = "color: #fd7e14; padding-left: 4px;";
         break;
     }
@@ -293,8 +313,8 @@ int MainWindow::getMaxClientsForMode(WorkMode mode) const
 {
     switch (mode) {
     case WorkMode::AntennaGroundTest: return 1;
-    case WorkMode::SimulateDevice:     return 2;
-    default:                           return 0;
+    case WorkMode::AutoTest:          return -1;   // -1 表示不限制连接数
+    default:                          return 0;
     }
 }
 
@@ -308,10 +328,10 @@ void MainWindow::onConfirmModeClicked()
 
     if (idx == 0) {
         m_currentMode = WorkMode::AntennaGroundTest;
-        appendLog("工作模式：【单独天线地检模式】（最多连接 1 个客户端）");
+        appendLog("工作模式：【单独天线地检模式】");
     } else if (idx == 1) {
-        m_currentMode = WorkMode::SimulateDevice;
-        appendLog("工作模式：【模拟电子设备模式】（最多连接 2 个客户端）");
+        m_currentMode = WorkMode::AutoTest;
+        appendLog("工作模式：【自动测试模式】");
     }
 
     updateUIState();
@@ -408,6 +428,8 @@ void MainWindow::onServerClientDisconnected(const ConnectionHandle &h)
 
 void MainWindow::onServerDataReceived(const ConnectionHandle &h, const QByteArray &data)
 {
+    Q_UNUSED(h)
+
     // 写入对应客户端的环形缓冲区
     auto it = m_clientBuffers.find(h.id);
     if (it == m_clientBuffers.end()) return;
@@ -415,32 +437,27 @@ void MainWindow::onServerDataReceived(const ConnectionHandle &h, const QByteArra
     auto &ringBuf = it.value();
     ringBuf->write(data);
 
-    // 循环解析完整帧
-    while (true) {
-        size_t available = ringBuf->readableBytes();
-        if (!ProtocolCodec::hasCompleteFrame(static_cast<int>(available))) {
-            break;
-        }
+    // ============================================================
+    //  服务端模式：使用 ServerProtocol 解析遥测子帧并分发
+    //
+    //  数据流向：
+    //    客户端(天线地检端) → TCP → RingBuffer
+    //      → ServerProtocol::resolve()   （帧同步+校验+拆分）
+    //        → MainWindow 内联类型识别     （速变/直接遥测）
+    //          → updataDir()              （分发到电子设备窗口）
+    //
+    //  注意：速变遥测和直接遥测均属于电子设备遥测数据，
+    //        统一分发到 ElectronicDeviceWindow 进行解码显示。
+    //        ProtocolCodec (EB90 标准帧/客户端协议) 仅用于客户端模式，此处不使用
+    // ============================================================
 
-        size_t peekSize = std::min(available, static_cast<size_t>(65536));
-        QByteArray preview = ringBuf->peek(peekSize);
-        if (preview.isEmpty()) break;
+    // 从缓冲区解析出所有遥测子帧（内部完成 findFrame→校验→拆分）
+    QList<QByteArray> subFrames = ServerProtocol::resolve(ringBuf.get());
 
-        DataFrame frame;
-        int consumed = 0;
-        bool parsed = ProtocolCodec::parse(preview, frame, consumed);
-
-        if (!parsed) {
-            if (consumed > 0) {
-                ringBuf->consume(static_cast<size_t>(consumed));
-                continue;
-            } else {
-                break;
-            }
-        }
-
-        ringBuf->consume(static_cast<size_t>(consumed));
-        handleReceivedFrame(h.id, frame);
+    // 遍历所有子帧，统一转发到电子设备窗口处理
+    for (const QByteArray &subFrame : subFrames)
+    {
+        updataTelemetryData(subFrame);
     }
 }
 
@@ -591,14 +608,22 @@ void MainWindow::broadcastFrame(quint8 command, const QByteArray &payload)
 }
 
 /**
- * @brief 接收子窗口发出的原始控制指令，通过主界面客户端发送
+ * @brief 接收子窗口发出的原始控制指令
+ *
+ * 自动测试模式下广播发送给所有已连接客户端，
+ * 单独天线地检模式下定向发送到服务器。
  */
 void MainWindow::onSendRawCommand(const QByteArray &command)
 {
     QString hexStr = command.toHex(' ').toUpper();
 
-    // 客户端模式下，通过 clientSocket 向服务器发送指令
-    if (m_network->isClientConnected() && m_network->sendToServer(command)) {
+    // 自动测试模式：广播给所有客户端；其他模式：发送到服务器
+    if (m_currentMode == WorkMode::AutoTest && m_network->isServerRunning()) {
+        m_network->broadcastToClients(command);
+        appendLog(QString("[指令广播→所有客户端] %1 字节 [%2]")
+                  .arg(command.size()).arg(hexStr));
+    }
+    else if (m_network->isClientConnected() && m_network->sendToServer(command)) {
         appendLog(QString("[指令发送→服务器] %1 字节 [%2]")
                   .arg(command.size()).arg(hexStr));
     } else {
@@ -662,16 +687,37 @@ void MainWindow::handleHeartbeat(int clientId, const DataFrame &frame)
     Q_UNUSED(frame)
 }
 
-/** 遥测数据上传 — 接收客户端上报的遥测数据 */
+/** 遥测数据上传 — 客户端模式：接收服务端返回的遥测数据 */
 void MainWindow::handleTelemetryData(int clientId, const DataFrame &frame)
 {
     Q_UNUSED(clientId)
 
+    // 客户端模式下，服务端返回的遥测数据分发到对应子窗口
     if (m_antennaDeviceWindow) {
         m_antennaDeviceWindow->parseWaveControlTelemetry(frame.payload);
     }
     if (temperatureTab) {
         temperatureTab->parseThermalTelemetry(frame.payload);
+    }
+}
+
+// ============================================================================
+//                    遥测子帧分发
+//
+//  以下方法负责将 ServerProtocol::resolve() 解析出的子帧数据
+//  转发到对应的 UI 子窗口。
+//
+//  调用链：onServerDataReceived → ServerProtocol::resolve()
+//                              → updataTelemetryData()  （电子设备遥测）
+//
+//  注意：速变遥测和直接遥测均属电子设备遥测，统一由 ElectronicDeviceWindow 处理。
+// ============================================================================
+
+void MainWindow::updataTelemetryData(const QByteArray &data)
+{
+    // 直接遥测 → 电子设备窗口进行 Calc 解码显示
+    if (electronicTab) {
+        electronicTab->decodeTelemetry(data);
     }
 }
 
@@ -731,6 +777,20 @@ void MainWindow::appendLog(const QString &message)
 void MainWindow::updateDateTime()
 {
     m_timeLabel->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
+}
+
+/**
+ * @brief 状态栏防护定时器回调 — 清除 IE 控件写入的临时消息
+ *
+ * IE WebBrowser ActiveX 控件（PowerVoltageWindow 内嵌）在加载网页时
+ * 会通过 StatusTextChange 事件向 MainWindow 状态栏写入临时消息
+ * （如 "正在下载数据..."、"完毕" 等），覆盖自定义的三段式布局。
+ *
+ * clearMessage() 只清除临时消息区，不影响 addWidget 永久控件。
+ */
+void MainWindow::onStatusBarGuardTimer()
+{
+    ui->statusbar->clearMessage();
 }
 
 QString MainWindow::clientPeerLabel(int clientId)
