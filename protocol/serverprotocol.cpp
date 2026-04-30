@@ -7,9 +7,8 @@
  * 数据流向：
  *   TCP 客户端（天线地检端）
  *     → 原始字节流写入 RingBuffer
- *       → ServerProtocol::resolve(ringBuffer)    （帧同步+校验+拆分）
- *         → MainWindow 内联判断子帧类型           （速变遥测/直接遥测）
- *           → updataDir()                         （分发到电子设备窗口）
+ *       → ServerProtocol::resolve(ringBuffer)    （帧同步+校验+拆分，循环提取所有帧）
+ *         → MainWindow::updataTelemetryData()     （统一转发到电子设备窗口）
  *
  * 对应 C# 方法：
  *   C# FindData    → findFrame()
@@ -17,7 +16,7 @@
  *   C# ResolveData → resolve()
  *
  * 注意：本类只负责协议层解析（到 resolve 为止），
- *       子帧类型识别和业务分发由 MainWindow 负责。
+ *       子帧类型识别由 ElectronicDeviceWindow 内部的 decodeTelemetry 负责。
  */
 
 #include "serverprotocol.h"
@@ -167,7 +166,7 @@ bool ServerProtocol::validate(const QByteArray &data, int len)
     for (i = 1; i < static_cast<quint16>(len); i++)
     {
         // 1. 取出当前字节（data[i]），与ax异或（对应C# ax ^= ((byte)data[i])）
-        quint8 currentByte = static_cast<quint8>(data.at(i)); // 转换为无符号8位整数，对应C# byte
+        quint8 currentByte = static_cast<uint8_t>(data.at(i)); // 转换为无符号8位整数，对应C# byte
         ax ^= currentByte;
 
         // 2. 内层循环（j从0到7，处理当前字节的每一位）
@@ -192,13 +191,13 @@ bool ServerProtocol::validate(const QByteArray &data, int len)
     // C# BitConverter.GetBytes(ushort)返回2字节数组，小端模式下：b[0]是低字节，b[1]是高字节
     // 直接拆分quint16 ax为两个字节，与C#结果保持一致
     quint8 b0 = static_cast<quint8>(ax & 0x00FF);  // 低字节（对应C# b[0]）
-    quint8 b1 = static_cast<quint8>((ax >> 8) & 0x00FF); // 高字节（对应C# b[1]）
+    quint8 b1 = static_cast<uint8_t>((ax >> 8) & 0x00FF); // 高字节（对应C# b[1]）
 
     // ======================================
     // 对应C#：对比data[len] == b[1] && data[len+1] == b[0]
     // ======================================
-    quint8 dataLenByte = static_cast<quint8>(data.at(len));
-    quint8 dataLen1Byte = static_cast<quint8>(data.at(len + 1));
+    uint8_t dataLenByte = static_cast<uint8_t>(data.at(len));
+    uint8_t dataLen1Byte = static_cast<uint8_t>(data.at(len + 1));
 
     if (dataLenByte == b1 && dataLen1Byte == b0)
     {
@@ -213,7 +212,10 @@ bool ServerProtocol::validate(const QByteArray &data, int len)
 
 // ============================================================================
 //
-//                      ★ resolve ★ — 完整解析流水线
+//                      ★ resolve ★ — 完整解析流水线（循环提取所有帧）
+//
+//  修复：原实现只提取一帧就返回，导致缓冲区中积压的帧要等下一批数据才处理。
+//  现改为 while(true) 循环，一次性把缓冲区中所有完整帧全部提取出来。
 //
 // ============================================================================
 
@@ -221,46 +223,51 @@ QList<QByteArray> ServerProtocol::resolve(RingBuffer *ringBuffer)
 {
     QList<QByteArray> resultList;
 
-    // 步骤①：findFrame 提取一帧原始数据
-    QByteArray data = findFrame(ringBuffer);
-    if (data.isEmpty()) return resultList;
-
-    // 步骤②：全零检测（全零帧视为无效填充）
-    bool isNonZeroData = false;
-    for (char byteChar : data)
+    // ★ 循环提取所有完整帧 ★
+    while (true)
     {
-        if (static_cast<uint8_t>(byteChar) != 0) { isNonZeroData = true; break; }
-    }
-    if (!isNonZeroData) return resultList;
+        // 步骤①：findFrame 提取一帧原始数据（内部会 consume 已处理字节）
+        QByteArray data = findFrame(ringBuffer);
+        if (data.isEmpty()) break;   // 缓冲区无完整帧，退出循环
 
-    // 步骤③：累加和校验（校验长度 = 数据长度 - 3）
-    int validateLength = data.length() - 3;
-    if (!validate(data, validateLength)) return resultList;
-
-    // 步骤④：子段拆分（从偏移11开始按 [类型][长度H][长度L] 格式逐个解析）
-    if (data.length() > 14)
-    {
-        int p = 11;   // 子段起始偏移量
-
-        while (p < data.length() - 3)
+        // 步骤②：全零检测（全零帧视为无效填充）
+        bool isNonZeroData = false;
+        for (char byteChar : data)
         {
-            quint8 lenHigh = static_cast<quint8>(data.at(p + 1));
-            quint8 lenLow  = static_cast<quint8>(data.at(p + 2));
-            int subLen = lenHigh * 256 + lenLow;
-
-            QByteArray subFrame(subLen + 1, 0);
-            subFrame[0] = data.at(p);    // 类型码
-            p += 3;
-
-            for (int i = 1; i < subFrame.length(); ++i)
-            {
-                if (p >= data.length()) break;
-                subFrame[i] = data.at(p);
-                ++p;
-            }
-
-            resultList.append(subFrame);
+            if (static_cast<uint8_t>(byteChar) != 0) { isNonZeroData = true; break; }
         }
+        if (!isNonZeroData) continue;   // 跳过全零帧，继续尝试下一帧
+
+        // 步骤③：累加和校验（校验长度 = 数据长度 - 3）
+        int validateLength = data.length() - 3;
+        if (!validate(data, validateLength)) continue;   // 校验失败跳过，继续下一帧
+
+        // 步骤④：子段拆分（从偏移11开始按 [类型][长度H][长度L] 格式逐个解析）
+        if (data.length() > 14)
+        {
+            int p = 11;   // 子段起始偏移量
+
+            while (p < data.length() - 3)
+            {
+                quint8 lenHigh = static_cast<uint8_t>(data.at(p + 1));
+                quint8 lenLow  = static_cast<uint8_t>(data.at(p + 2));
+                int subLen = lenHigh * 256 + lenLow;
+
+                QByteArray subFrame(subLen + 1, 0);
+                subFrame[0] = data.at(p);    // 类型码
+                p += 3;
+
+                for (int i = 1; i < subFrame.length(); ++i)
+                {
+                    if (p >= data.length()) break;
+                    subFrame[i] = data.at(p);
+                    ++p;
+                }
+
+                resultList.append(subFrame);
+            }
+        }
+        // 不 break！继续 while 循环尝试提取缓冲区中的下一帧
     }
 
     return resultList;

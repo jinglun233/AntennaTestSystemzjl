@@ -80,6 +80,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->telemetryTabWidget->replaceTabBar();
 
+    // ========== 电子设备窗口信号连接 ==========
+    // 遥测日志 → 主窗口日志区
+    connect(electronicTab, &ElectronicDeviceWindow::signalUpdateLogText,
+            this, &MainWindow::appendLog);
+    // UI 更新已由 ElectronicDeviceWindow 内部自行处理（QMetaObject::invokeMethod）
+
     // ========== 状态栏三段布局 ==========
     m_modeStatusLabel = new QLabel(this);
     m_modeStatusLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
