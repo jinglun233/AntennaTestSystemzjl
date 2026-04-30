@@ -377,7 +377,6 @@ void NetworkManager::onNewConnection()
         h.connected = true;
 
         emit serverClientConnected(h);
-        emit logMessage(QString("[网络] 客户端 #%1 已接入 %2").arg(id).arg(h.peerInfo));
     }
 }
 
